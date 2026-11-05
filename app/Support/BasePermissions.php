@@ -18,6 +18,10 @@ class BasePermissions
         'permissions.view' => 'Consultar permisos',
         'permissions.assign' => 'Asignar permisos a roles',
         'audit.view' => 'Consultar auditoría administrativa',
+        'notifications.view' => 'Consultar mensajes transaccionales y sus intentos',
+        'notifications.retry' => 'Reintentar mensajes transaccionales fallidos',
+        'notifications.view' => 'Consultar mensajes transaccionales y sus intentos',
+        'notifications.retry' => 'Reintentar mensajes transaccionales fallidos',
     ];
 
     /** @var list<string> */
@@ -25,5 +29,6 @@ class BasePermissions
         'users.view', 'users.create', 'users.update', 'users.disable',
         'roles.view', 'roles.create', 'roles.update', 'roles.assign',
         'permissions.view', 'permissions.assign',
+        'notifications.view', 'notifications.retry',
     ];
 }

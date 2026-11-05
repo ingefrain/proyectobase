@@ -19,7 +19,7 @@ class CreateBaseAdminCommandTest extends TestCase
             ->expectsQuestion('Correo', 'inicio@example.test')
             ->expectsQuestion('Contraseña (mínimo 12 caracteres)', 'Clave-segura-inicial-123!')
             ->expectsQuestion('Confirma la contraseña', 'Clave-segura-inicial-123!')
-            ->expectsOutputToContain('Cuenta administrativa creada: inicio@example.test')
+            ->expectsOutputToContain('Cuenta administrativa creada.')
             ->assertExitCode(0);
 
         $user = User::query()->where('email', 'inicio@example.test')->firstOrFail();
@@ -28,5 +28,27 @@ class CreateBaseAdminCommandTest extends TestCase
         $this->assertSame(['administrator'], $user->roles()->pluck('key')->all());
         $this->assertTrue($user->can('permissions.assign'));
         $this->assertSame(1, Role::query()->where('key', 'administrator')->count());
+    }
+
+    public function test_command_reads_credentials_from_a_file_without_printing_them(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'base-admin-');
+        file_put_contents($path, implode(PHP_EOL, [
+            'name: Archivo Inicial',
+            'email: archivo@example.test',
+            'password: Clave-archivo-segura-123!',
+        ]));
+
+        try {
+            $this->artisan('base:admin', ['--from-file' => $path])
+                ->expectsOutputToContain('Cuenta administrativa creada.')
+                ->assertExitCode(0);
+
+            $user = User::query()->where('email', 'archivo@example.test')->firstOrFail();
+            $this->assertTrue(Hash::check('Clave-archivo-segura-123!', $user->password));
+            $this->assertTrue($user->can('permissions.assign'));
+        } finally {
+            @unlink($path);
+        }
     }
 }

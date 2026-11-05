@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Resumen') · Proyecto Base</title>
-    <link rel="stylesheet" href="{{ asset('assets/base-admin/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/base-admin/admin.css') }}?v={{ filemtime(public_path('assets/base-admin/admin.css')) }}">
 </head>
 <body class="admin-body">
     <a class="skip-link" href="#main-content">Saltar al contenido</a>
@@ -21,7 +21,7 @@
                 @can('dashboard.view')
                     <a class="side-link {{ request()->routeIs('admin.dashboard') ? 'is-active' : '' }}" href="{{ route('admin.dashboard') }}" @if(request()->routeIs('admin.dashboard')) aria-current="page" @endif>Resumen</a>
                 @endcan
-                @canany(['users.view', 'roles.view', 'permissions.view', 'audit.view'])
+                @canany(['users.view', 'roles.view', 'permissions.view', 'audit.view', 'notifications.view'])
                     <p class="sidebar-label">Administración</p>
                 @endcanany
                 @can('users.view')
@@ -35,6 +35,9 @@
                 @endcan
                 @can('audit.view')
                     <a class="side-link {{ request()->routeIs('admin.audit.*') ? 'is-active' : '' }}" href="{{ route('admin.audit.index') }}" @if(request()->routeIs('admin.audit.*')) aria-current="page" @endif>Auditoría</a>
+                @endcan
+                @can('notifications.view')
+                    <a class="side-link {{ request()->routeIs('admin.notifications.*') ? 'is-active' : '' }}" href="{{ route('admin.notifications.index') }}" @if(request()->routeIs('admin.notifications.*')) aria-current="page" @endif>Notificaciones</a>
                 @endcan
                 <p class="sidebar-label">Cuenta</p>
                 <a class="side-link {{ request()->routeIs('admin.profile.*') ? 'is-active' : '' }}" href="{{ route('admin.profile.edit') }}" @if(request()->routeIs('admin.profile.*')) aria-current="page" @endif>Perfil</a>

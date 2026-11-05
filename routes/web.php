@@ -5,13 +5,14 @@ use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\Auth\NewPasswordController;
 use App\Http\Controllers\Admin\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/admin/login');
+Route::get('/', fn () => redirect()->route('admin.login'));
 
 Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::middleware('guest')->group(function (): void {
@@ -48,5 +49,8 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
 
         Route::get('/permissions', [PermissionController::class, 'index'])->middleware('can:permissions.view')->name('permissions.index');
         Route::get('/audit', [AuditController::class, 'index'])->middleware('can:audit.view')->name('audit.index');
+        Route::get('/notifications', [NotificationController::class, 'index'])->middleware('can:notifications.view')->name('notifications.index');
+        Route::get('/notifications/{outboxMessage}', [NotificationController::class, 'show'])->middleware('can:notifications.view')->name('notifications.show');
+        Route::post('/notifications/{outboxMessage}/retry', [NotificationController::class, 'retry'])->middleware('can:notifications.retry')->name('notifications.retry');
     });
 });

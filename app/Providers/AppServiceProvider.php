@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contracts\OutboxEmailSender;
+use App\Mail\LaravelOutboxEmailSender;
 use App\Models\User;
 use App\Support\BasePermissions;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -15,7 +17,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(OutboxEmailSender::class, LaravelOutboxEmailSender::class);
     }
 
     /**

@@ -11,19 +11,35 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 
 class CreateBaseAdmin extends Command
 {
-    protected $signature = 'base:admin';
+    protected $signature = 'base:admin {--from-file= : Leer name, email y password de un archivo local}';
 
     protected $description = 'Crea interactivamente la primera cuenta administrativa de Proyecto Base';
 
     public function handle(AdminAuditLogger $audit): int
     {
-        $name = trim((string) $this->ask('Nombre'));
-        $email = mb_strtolower(trim((string) $this->ask('Correo')));
-        $password = (string) $this->secret('Contraseña (mínimo 12 caracteres)');
-        $confirmation = (string) $this->secret('Confirma la contraseña');
+        $file = $this->option('from-file');
+        if ($file) {
+            try {
+                $input = $this->readInputFile((string) $file);
+            } catch (ValidationException) {
+                $this->components->error('El archivo debe contener una sola vez los campos name, email y password.');
+
+                return self::FAILURE;
+            }
+            $name = $input['name'];
+            $email = mb_strtolower($input['email']);
+            $password = $input['password'];
+            $confirmation = $password;
+        } else {
+            $name = trim((string) $this->ask('Nombre'));
+            $email = mb_strtolower(trim((string) $this->ask('Correo')));
+            $password = (string) $this->secret('Contraseña (mínimo 12 caracteres)');
+            $confirmation = (string) $this->secret('Confirma la contraseña');
+        }
 
         $validator = Validator::make(
             ['name' => $name, 'email' => $email, 'password' => $password, 'password_confirmation' => $confirmation],
@@ -69,8 +85,41 @@ class CreateBaseAdmin extends Command
             return $user;
         });
 
-        $this->components->info("Cuenta administrativa creada: {$user->email}");
+        $this->components->info('Cuenta administrativa creada.');
 
         return self::SUCCESS;
+    }
+
+    /** @return array{name: string, email: string, password: string} */
+    private function readInputFile(string $path): array
+    {
+        if (! is_file($path) || ! is_readable($path)) {
+            throw ValidationException::withMessages(['file' => 'Archivo no disponible.']);
+        }
+
+        $fields = [];
+        foreach (file($path, FILE_IGNORE_NEW_LINES) as $line) {
+            $line = ltrim($line, "\xEF\xBB\xBF");
+            if (trim($line) === '') {
+                continue;
+            }
+            if (! preg_match('/^\s*(name|email|password)\s*[:=]\s*(.*)$/i', $line, $matches)) {
+                continue;
+            }
+
+            $key = strtolower($matches[1]);
+            if (array_key_exists($key, $fields)) {
+                throw ValidationException::withMessages(['file' => 'Campo duplicado.']);
+            }
+            $fields[$key] = $key === 'password' ? $matches[2] : trim($matches[2]);
+        }
+
+        foreach (['name', 'email', 'password'] as $key) {
+            if (! array_key_exists($key, $fields) || $fields[$key] === '') {
+                throw ValidationException::withMessages(['file' => 'Falta un campo.']);
+            }
+        }
+
+        return $fields;
     }
 }

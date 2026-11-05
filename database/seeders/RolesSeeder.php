@@ -15,9 +15,7 @@ class RolesSeeder extends Seeder
             ['name' => 'Administrador', 'description' => 'Acceso administrativo completo.', 'is_active' => true],
         );
 
-        if ($administrator->wasRecentlyCreated) {
-            $administrator->permissions()->sync(Permission::query()->pluck('id')->all());
-        }
+        $administrator->permissions()->syncWithoutDetaching(Permission::query()->pluck('id')->all());
 
         Role::query()->firstOrCreate(
             ['key' => 'operator'],

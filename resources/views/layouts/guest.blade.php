@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Acceso') · Proyecto Base</title>
-    <link rel="stylesheet" href="{{ asset('assets/base-admin/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/base-admin/admin.css') }}?v={{ filemtime(public_path('assets/base-admin/admin.css')) }}">
 </head>
 <body class="guest-body">
     <main class="guest-card" id="main-content">

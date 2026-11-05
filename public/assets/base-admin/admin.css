@@ -104,6 +104,7 @@ td .table-subtitle { display: block; max-width: 280px; margin-top: 3px; overflow
 .badge { display: inline-flex; align-items: center; min-height: 23px; padding: 3px 8px; border-radius: 999px; font-size: .72rem; font-weight: 700; }
 .badge-success { color: #216c50; background: #e4f4ec; }
 .badge-muted { color: #586c78; background: #e9eef1; }
+.badge-danger { color: #8f3131; background: #ffefec; }
 .badge-neutral { color: #365366; background: #eaf1f5; }
 .pagination-wrap { margin-top: 20px; }
 .pagination-wrap nav { display: flex; justify-content: space-between; gap: 12px; }
@@ -117,9 +118,16 @@ label { color: #355163; }
 input:not([type=checkbox]), select, textarea { width: 100%; min-height: 43px; padding: 9px 11px; border: 1px solid #bdcbd3; border-radius: 8px; color: var(--ink); background: white; }
 textarea { min-height: 90px; resize: vertical; }
 input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--teal); }
-.check-row { display: flex; align-items: center; gap: 9px; color: #3d5869; font-size: .84rem; font-weight: 550; }
+.stack-form > label.check-row { display: flex; align-items: center; flex-wrap: nowrap; gap: 9px; color: #3d5869; font-size: .84rem; font-weight: 550; white-space: nowrap; }
+.stack-form > label.check-row input[type=checkbox] { flex: 0 0 17px; margin: 0; }
 .field-hint { margin: 0; color: var(--muted); font-size: .77rem; font-weight: 400; }
 .field-error { margin: 0; color: #a12828; font-size: .8rem; }
+.detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; margin: 0; }
+.detail-grid > div { min-width: 0; }
+.detail-grid dt { color: var(--muted); font-size: .77rem; font-weight: 700; }
+.detail-grid dd { margin: 5px 0 0; overflow-wrap: anywhere; }
+.detail-wide { grid-column: 1 / -1; }
+.form-actions { display: flex; justify-content: flex-end; margin-top: 20px; }
 .field-label { font-weight: 700; }
 .key-display { display: inline-flex; align-items: center; min-height: 43px; }
 .choice-fieldset, .permission-group { min-width: 0; margin: 8px 0; padding: 14px; border: 1px solid var(--line); border-radius: 11px; }
@@ -185,6 +193,8 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--teal); }
     .metric-card { min-height: 112px; }
     .field-grid, .choice-grid, .permission-grid { grid-template-columns: 1fr; }
     .panel { padding: 16px; border-radius: 12px; }
+    .detail-grid { grid-template-columns: 1fr; }
+    .detail-wide { grid-column: auto; }
     .filter-bar { align-items: stretch; flex-direction: column; }
     .filter-bar label { width: 100%; }
     .filter-actions > * { flex: 1; }
