@@ -3,7 +3,7 @@
 @section('title', 'Detalle de notificación')
 
 @section('content')
-    <div class="page-intro"><div><p class="eyebrow">Administración · Notificaciones</p><h2>Detalle de entrega</h2><p class="muted">El destinatario se muestra parcialmente y el contenido queda oculto.</p></div><a class="button button-secondary" href="{{ route('admin.notifications.index') }}">Volver</a></div>
+    <div class="page-intro"><p class="muted">El destinatario se muestra parcialmente y el contenido queda oculto.</p><a class="button button-secondary" href="{{ route('admin.notifications.index') }}">Volver</a></div>
     <section class="panel">
         <dl class="detail-grid">
             <div><dt>Identificador</dt><dd><code>{{ $outboxMessage->uuid }}</code></dd></div>

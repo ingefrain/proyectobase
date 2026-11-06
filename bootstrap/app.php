@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureSessionIsCurrent;
+use App\Http\Middleware\RecordUserActivity;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'account.active' => EnsureAccountIsActive::class,
             'session.current' => EnsureSessionIsCurrent::class,
         ]);
+        $middleware->appendToGroup('web', RecordUserActivity::class);
         $middleware->redirectGuestsTo(fn (Request $request): string => route('admin.login'));
         $middleware->redirectUsersTo(fn (Request $request): string => route('admin.profile.edit'));
     })

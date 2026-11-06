@@ -13,7 +13,7 @@
     <div class="admin-shell">
         <button class="drawer-scrim" type="button" data-drawer-close aria-label="Cerrar menú" tabindex="-1"></button>
         <aside class="sidebar" id="admin-sidebar" aria-label="Navegación administrativa">
-            <a class="brand" href="{{ route('admin.dashboard') }}">
+            <a class="brand" href="{{ auth()->user()->can('dashboard.view') ? route('admin.dashboard') : route('admin.settings.index') }}">
                 <span class="brand-mark" aria-hidden="true">PB</span>
                 <span><strong>Proyecto Base</strong><small>Administración</small></span>
             </a>
@@ -22,33 +22,9 @@
                     <a class="side-link {{ request()->routeIs('admin.dashboard') ? 'is-active' : '' }}" href="{{ route('admin.dashboard') }}" @if(request()->routeIs('admin.dashboard')) aria-current="page" @endif>Resumen</a>
                 @endcan
                 @canany(['users.view', 'roles.view', 'permissions.view', 'audit.view', 'notifications.view'])
-                    <p class="sidebar-label">Administración</p>
+                    <a class="side-link {{ request()->routeIs('admin.settings.*', 'admin.users.*', 'admin.roles.*', 'admin.permissions.*', 'admin.audit.*', 'admin.notifications.*') ? 'is-active' : '' }}" href="{{ route('admin.settings.index') }}" @if(request()->routeIs('admin.settings.*', 'admin.users.*', 'admin.roles.*', 'admin.permissions.*', 'admin.audit.*', 'admin.notifications.*')) aria-current="page" @endif>Configuración</a>
                 @endcanany
-                @can('users.view')
-                    <a class="side-link {{ request()->routeIs('admin.users.*') ? 'is-active' : '' }}" href="{{ route('admin.users.index') }}" @if(request()->routeIs('admin.users.*')) aria-current="page" @endif>Usuarios</a>
-                @endcan
-                @can('roles.view')
-                    <a class="side-link {{ request()->routeIs('admin.roles.*') ? 'is-active' : '' }}" href="{{ route('admin.roles.index') }}" @if(request()->routeIs('admin.roles.*')) aria-current="page" @endif>Roles</a>
-                @endcan
-                @can('permissions.view')
-                    <a class="side-link {{ request()->routeIs('admin.permissions.*') ? 'is-active' : '' }}" href="{{ route('admin.permissions.index') }}" @if(request()->routeIs('admin.permissions.*')) aria-current="page" @endif>Permisos</a>
-                @endcan
-                @can('audit.view')
-                    <a class="side-link {{ request()->routeIs('admin.audit.*') ? 'is-active' : '' }}" href="{{ route('admin.audit.index') }}" @if(request()->routeIs('admin.audit.*')) aria-current="page" @endif>Auditoría</a>
-                @endcan
-                @can('notifications.view')
-                    <a class="side-link {{ request()->routeIs('admin.notifications.*') ? 'is-active' : '' }}" href="{{ route('admin.notifications.index') }}" @if(request()->routeIs('admin.notifications.*')) aria-current="page" @endif>Notificaciones</a>
-                @endcan
-                <p class="sidebar-label">Cuenta</p>
-                <a class="side-link {{ request()->routeIs('admin.profile.*') ? 'is-active' : '' }}" href="{{ route('admin.profile.edit') }}" @if(request()->routeIs('admin.profile.*')) aria-current="page" @endif>Perfil</a>
             </nav>
-            <div class="sidebar-bottom">
-                <p class="sidebar-note"><span class="status-dot" aria-hidden="true"></span>Sesión administrativa activa</p>
-                <form method="POST" action="{{ route('admin.logout') }}">
-                    @csrf
-                    <button class="side-link logout-link" type="submit">Cerrar sesión</button>
-                </form>
-            </div>
         </aside>
 
         <div class="workspace">
@@ -67,10 +43,11 @@
                         <span aria-hidden="true">⌄</span>
                     </summary>
                     <div class="profile-dropdown">
-                        <span class="dropdown-caption">Sesión iniciada como</span>
-                        <strong>{{ auth()->user()->name }}</strong>
-                        <span class="dropdown-email">{{ auth()->user()->email }}</span>
-                        <a href="{{ route('admin.profile.edit') }}">Ver perfil</a>
+                        <a class="account-menu-link" href="{{ route('admin.profile.edit') }}">Mi perfil</a>
+                        <form method="POST" action="{{ route('admin.logout') }}">
+                            @csrf
+                            <button class="account-menu-link account-menu-button" type="submit">Cerrar sesión</button>
+                        </form>
                     </div>
                 </details>
             </header>

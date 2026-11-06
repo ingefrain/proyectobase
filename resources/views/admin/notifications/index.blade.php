@@ -3,7 +3,7 @@
 @section('title', 'Notificaciones')
 
 @section('content')
-    <div class="page-intro"><div><p class="eyebrow">Administración</p><h2>Notificaciones</h2><p class="muted">Estado de entrega y registro de intentos. El contenido del mensaje se oculta.</p></div></div>
+    <div class="page-intro"><p class="muted">Consulta entregas, reintentos y mensajes del sistema. El contenido se mantiene oculto.</p></div>
     <section class="panel">
         <form method="GET" action="{{ route('admin.notifications.index') }}" class="filter-bar" aria-label="Filtrar mensajes transaccionales">
             <label class="filter-search" for="q">Buscar por ID, correlación o correo exacto<input id="q" name="q" type="search" value="{{ $filters['q'] ?? '' }}" maxlength="320"></label>

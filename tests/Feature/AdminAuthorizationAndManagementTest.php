@@ -50,7 +50,7 @@ class AdminAuthorizationAndManagementTest extends TestCase
         $this->actingAsAdmin($admin)->get(route('admin.roles.create'))->assertOk()->assertSee('Crear rol');
         $this->actingAsAdmin($admin)->get(route('admin.roles.edit', $role))->assertOk()->assertSee('Permisos');
         $this->actingAsAdmin($admin)->get(route('admin.permissions.index'))->assertOk()->assertSee('users.disable');
-        $this->actingAsAdmin($admin)->get(route('admin.profile.edit'))->assertOk()->assertSee('Tu perfil');
+        $this->actingAsAdmin($admin)->get(route('admin.profile.edit'))->assertOk()->assertSee('Mi perfil');
     }
 
     public function test_admin_can_create_update_searchable_user_and_assign_a_role(): void

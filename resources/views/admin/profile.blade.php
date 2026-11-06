@@ -1,9 +1,9 @@
 @extends('layouts.admin')
 
-@section('title', 'Perfil')
+@section('title', 'Mi perfil')
 
 @section('content')
-    <div class="page-intro"><div><p class="eyebrow">Cuenta</p><h2>Tu perfil</h2><p class="muted">Actualiza tus datos de acceso personales.</p></div></div>
+    <div class="page-intro"><p class="muted">Actualiza tus datos de acceso personales.</p></div>
     <section class="panel form-panel">
         <h2>Datos personales</h2>
         <dl class="profile-summary"><div><dt>Correo electrónico</dt><dd>{{ auth()->user()->email }}</dd></div><div><dt>Estado</dt><dd><span class="badge badge-success">Activo</span></dd></div></dl>

@@ -3,7 +3,7 @@
 @section('title', 'Roles')
 
 @section('content')
-    <div class="page-intro"><div><p class="eyebrow">Administración</p><h2>Roles</h2><p class="muted">Agrupa permisos en conjuntos de acceso asignables.</p></div>@can('roles.create')<a class="button button-primary" href="{{ route('admin.roles.create') }}">Crear rol</a>@endcan</div>
+    <div class="page-intro"><p class="muted">Define qué puede hacer cada tipo de usuario.</p><div class="page-actions">@can('permissions.view')<a class="button button-secondary" href="{{ route('admin.permissions.index') }}">Permisos avanzados</a>@endcan @can('roles.create')<a class="button button-primary" href="{{ route('admin.roles.create') }}">Crear rol</a>@endcan</div></div>
     <section class="panel">
         <form method="GET" action="{{ route('admin.roles.index') }}" class="filter-bar" aria-label="Filtrar roles">
             <label class="filter-search" for="q">Buscar<input id="q" name="q" type="search" value="{{ $filters['q'] ?? '' }}" placeholder="Nombre o clave"></label>

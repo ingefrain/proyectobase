@@ -3,7 +3,7 @@
 @section('title', $creating ? 'Crear usuario' : 'Editar usuario')
 
 @section('content')
-    <div class="page-intro"><div><p class="eyebrow">Administración / Usuarios</p><h2>{{ $creating ? 'Crear usuario' : 'Editar usuario' }}</h2><p class="muted">{{ $creating ? 'Agrega una cuenta administrativa.' : 'Actualiza la cuenta y sus accesos.' }}</p></div><a class="button button-secondary" href="{{ route('admin.users.index') }}">Volver a usuarios</a></div>
+    <div class="page-intro"><div><p class="eyebrow">Usuarios</p><p class="muted">{{ $creating ? 'Agrega una cuenta al sistema.' : 'Actualiza la cuenta y sus accesos.' }}</p></div><a class="button button-secondary" href="{{ route('admin.users.index') }}">Volver a usuarios</a></div>
     <section class="panel form-panel">
         <form method="POST" action="{{ $creating ? route('admin.users.store') : route('admin.users.update', $user) }}" class="stack-form">
             @csrf

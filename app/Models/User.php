@@ -23,6 +23,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
             'session_version' => 'integer',
+            'last_activity_at' => 'datetime',
         ];
     }
 

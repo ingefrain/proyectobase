@@ -3,7 +3,7 @@
 @section('title', $creating ? 'Crear rol' : 'Editar rol')
 
 @section('content')
-    <div class="page-intro"><div><p class="eyebrow">Administración / Roles</p><h2>{{ $creating ? 'Crear rol' : 'Editar rol' }}</h2><p class="muted">Las capacidades se comprueban en cada ruta del servidor.</p></div><a class="button button-secondary" href="{{ route('admin.roles.index') }}">Volver a roles</a></div>
+    <div class="page-intro"><div><p class="eyebrow">Roles</p><p class="muted">Las acciones disponibles se comprueban en el sistema.</p></div><a class="button button-secondary" href="{{ route('admin.roles.index') }}">Volver a roles</a></div>
     <section class="panel form-panel">
         <form method="POST" action="{{ $creating ? route('admin.roles.store') : route('admin.roles.update', $role) }}" class="stack-form">
             @csrf
