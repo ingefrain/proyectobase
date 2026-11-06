@@ -20,9 +20,10 @@ class AdminSettingsAndActivityTest extends TestCase
             ->assertOk()
             ->assertSee('Gestiona las personas con acceso al sistema.')
             ->assertSee('Consulta entregas, reintentos y mensajes del sistema.')
-            ->assertSee('Actividad')
+            ->assertSee('Auditoría del sistema')
             ->assertSee('Roles')
-            ->assertSee('Permisos avanzados');
+            ->assertDontSee('Permisos avanzados')
+            ->assertDontSee('Actividad administrativa');
 
         $reader = $this->userWithPermissions(['users.view']);
         $this->actingAs($reader)->withSession(['auth_session_version' => $reader->session_version])
@@ -30,7 +31,7 @@ class AdminSettingsAndActivityTest extends TestCase
             ->assertOk()
             ->assertSee('Usuarios')
             ->assertDontSee('Notificaciones')
-            ->assertDontSee('Actividad')
+            ->assertDontSee('Auditoría del sistema')
             ->assertDontSee('Roles');
 
         $noSettingsAccess = $this->userWithPermissions(['dashboard.view']);
@@ -39,7 +40,7 @@ class AdminSettingsAndActivityTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_profile_is_in_the_account_menu_and_users_offers_roles_without_direct_permissions_link(): void
+    public function test_profile_is_in_the_account_menu_and_roles_screen_stays_operational(): void
     {
         $admin = $this->adminUser();
         $this->actingAsAdmin($admin)->get(route('admin.users.index'))
@@ -54,14 +55,14 @@ class AdminSettingsAndActivityTest extends TestCase
         $this->actingAsAdmin($admin)->get(route('admin.roles.index'))
             ->assertOk()
             ->assertSee('Define qué puede hacer cada tipo de usuario.')
-            ->assertSee('Permisos avanzados')
-            ->assertSee('Crear rol');
+            ->assertSee('Crear rol')
+            ->assertDontSee('Permisos avanzados');
 
         $this->actingAsAdmin($admin)->get(route('admin.permissions.index'))
             ->assertOk()
             ->assertSee('Configuración avanzada')
             ->assertSee('Permisos del sistema')
-            ->assertSee('Estas capacidades son definidas por el sistema y se asignan mediante roles.')
+            ->assertSee('Capacidades definidas por el sistema que se asignan mediante roles.')
             ->assertDontSee('Crear permiso');
 
         $this->actingAsAdmin($admin)->get(route('admin.audit.index'))

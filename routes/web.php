@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\SystemAuditController;
+use App\Http\Controllers\Admin\SystemStatusController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +30,8 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::middleware(['auth', 'account.active', 'session.current'])->group(function (): void {
         Route::get('/', DashboardController::class)->middleware('can:dashboard.view')->name('dashboard');
         Route::get('/settings', SettingsController::class)->name('settings.index');
+        Route::get('/system-audit', SystemAuditController::class)->middleware('can:system.audit.view')->name('system-audit.index');
+        Route::get('/system-status', SystemStatusController::class)->middleware('can:system.audit.view')->name('system-status.index');
         Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');

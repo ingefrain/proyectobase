@@ -1,11 +1,11 @@
 @extends('layouts.admin')
 
-@section('title', 'Actividad')
+@section('title', 'Actividad administrativa')
 
 @section('content')
     <div class="page-intro"><p class="muted">Registro de cambios administrativos y acciones sensibles.</p></div>
     <section class="panel">
-        <form method="GET" action="{{ route('admin.audit.index') }}" class="filter-bar" aria-label="Filtrar actividad">
+        <form method="GET" action="{{ route('admin.audit.index') }}" class="filter-bar" aria-label="Filtrar actividad administrativa">
             <label for="entity">Tipo<select id="entity" name="entity"><option value="">Todos</option><option value="user" @selected(($filters['entity'] ?? '') === 'user')>Usuario</option><option value="role" @selected(($filters['entity'] ?? '') === 'role')>Rol</option></select></label>
             <label for="action">Acción<select id="action" name="action"><option value="">Todas</option>
                 @foreach(['user.created', 'user.updated', 'user.activated', 'user.deactivated', 'user.roles_assigned', 'user.password_changed', 'user.password_reset', 'user.profile_updated', 'role.created', 'role.updated', 'role.activated', 'role.deactivated', 'role.permissions_changed'] as $action)

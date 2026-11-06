@@ -3,7 +3,7 @@
 @section('title', 'Permisos del sistema')
 
 @section('content')
-    <div class="page-intro"><div><p class="eyebrow">Configuración avanzada</p><p class="muted">Estas capacidades son definidas por el sistema y se asignan mediante roles.</p></div></div>
+    <div class="page-intro"><div><p class="eyebrow">Configuración avanzada</p><p class="muted">Capacidades definidas por el sistema que se asignan mediante roles.</p></div></div>
     <div class="notice"><strong>Catálogo protegido</strong><span>Los permisos base no se crean desde el panel. Los proyectos derivados pueden añadir capacidades mediante sus migraciones o seeders.</span></div>
     @forelse($permissions as $group => $items)
         <section class="panel permission-list">

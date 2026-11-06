@@ -18,6 +18,7 @@ class BasePermissions
         'permissions.view' => 'Consultar permisos',
         'permissions.assign' => 'Asignar permisos a roles',
         'audit.view' => 'Consultar auditoría administrativa',
+        'system.audit.view' => 'Consultar herramientas técnicas y estado del sistema',
         'notifications.view' => 'Consultar mensajes transaccionales y sus intentos',
         'notifications.retry' => 'Reintentar mensajes transaccionales fallidos',
         'notifications.view' => 'Consultar mensajes transaccionales y sus intentos',
