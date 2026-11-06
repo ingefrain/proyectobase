@@ -4,7 +4,6 @@ namespace App\Services\Outbox;
 
 use App\Jobs\ProcessOutboxMessage;
 use App\Models\OutboxMessage;
-use App\Support\OutboxPayload;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -15,6 +14,8 @@ use Throwable;
 
 class OutboxDispatcher
 {
+    public function __construct(private readonly OutboxTransportResolver $transports) {}
+
     /** @param array<string, mixed> $payload */
     public function email(
         string $recipient,
@@ -23,10 +24,21 @@ class OutboxDispatcher
         ?string $idempotencyKey = null,
         ?string $correlationId = null,
     ): OutboxMessage {
-        $recipient = mb_strtolower(trim($recipient));
-        if (filter_var($recipient, FILTER_VALIDATE_EMAIL) === false) {
-            throw new InvalidArgumentException('A valid email recipient is required.');
-        }
+        return $this->dispatch('email', 'generic.email.v1', $recipient, $payload, $category, $idempotencyKey, $correlationId);
+    }
+
+    /** @param array<string, mixed> $payload */
+    public function dispatch(
+        string $channel,
+        string $template,
+        string $recipient,
+        array $payload,
+        string $category = 'transactional',
+        ?string $idempotencyKey = null,
+        ?string $correlationId = null,
+    ): OutboxMessage {
+        $transport = $this->transports->resolve($channel);
+        $recipient = $transport->normalizeRecipient($recipient);
         if (! preg_match('/\A[a-z0-9][a-z0-9._-]{0,79}\z/i', $category)) {
             throw new InvalidArgumentException('The notification category is invalid.');
         }
@@ -39,12 +51,12 @@ class OutboxDispatcher
         $idempotencyKey = $idempotencyKey === null ? null : trim($idempotencyKey);
         $correlationId = $correlationId === null ? null : trim($correlationId);
 
-        $safePayload = OutboxPayload::normalize($payload);
+        $safePayload = $transport->normalizePayload($template, $payload);
         $recipientHash = hash('sha256', $recipient);
         if ($idempotencyKey !== null) {
             $existing = OutboxMessage::query()->where('idempotency_key', $idempotencyKey)->first();
             if ($existing) {
-                $this->assertSameRequest($existing, $recipientHash, $category, $safePayload);
+                $this->assertSameRequest($existing, $recipientHash, $channel, $template, $category, $safePayload);
                 $this->dispatchAfterCommit($existing->id);
 
                 return $existing;
@@ -55,10 +67,10 @@ class OutboxDispatcher
             $message = OutboxMessage::query()->create([
                 'uuid' => (string) Str::uuid(),
                 'category' => $category,
-                'channel' => 'email',
+                'channel' => $channel,
                 'recipient' => $recipient,
                 'recipient_hash' => $recipientHash,
-                'template' => 'generic.email.v1',
+                'template' => $template,
                 'payload' => $safePayload,
                 'status' => OutboxMessage::PENDING,
                 'attempts' => 0,
@@ -75,7 +87,7 @@ class OutboxDispatcher
             if (! $existing) {
                 throw $exception;
             }
-            $this->assertSameRequest($existing, $recipientHash, $category, $safePayload);
+            $this->assertSameRequest($existing, $recipientHash, $channel, $template, $category, $safePayload);
             $this->dispatchAfterCommit($existing->id);
 
             return $existing;
@@ -111,9 +123,11 @@ class OutboxDispatcher
     }
 
     /** @param array<string, string> $payload */
-    private function assertSameRequest(OutboxMessage $existing, string $recipientHash, string $category, array $payload): void
+    private function assertSameRequest(OutboxMessage $existing, string $recipientHash, string $channel, string $template, string $category, array $payload): void
     {
         if ($existing->recipient_hash !== $recipientHash
+            || $existing->channel !== $channel
+            || $existing->template !== $template
             || $existing->category !== $category
             || $existing->payload !== $payload) {
             throw new RuntimeException('An idempotency key cannot be reused for a different notification.');

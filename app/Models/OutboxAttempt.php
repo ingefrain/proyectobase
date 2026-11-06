@@ -11,7 +11,7 @@ class OutboxAttempt extends Model
 
     protected $fillable = [
         'outbox_message_id', 'attempt_number', 'lease_token', 'result',
-        'error_type', 'error_code', 'error_message', 'started_at', 'finished_at',
+        'error_type', 'error_code', 'error_message', 'provider_reference', 'started_at', 'finished_at',
     ];
 
     protected function casts(): array

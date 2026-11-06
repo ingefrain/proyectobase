@@ -1,6 +1,15 @@
 <?php
 
+use App\Services\Outbox\EmailOutboxTransport;
+
 return [
+    'transports' => [
+        'email' => [
+            'enabled' => true,
+            'label' => 'Correo electrónico',
+            'class' => EmailOutboxTransport::class,
+        ],
+    ],
     'branding' => [
         'name' => env('NOTIFICATION_BRAND_NAME', env('APP_NAME', 'Proyecto Base')),
         'logo_url' => env('NOTIFICATION_BRAND_LOGO_URL'),

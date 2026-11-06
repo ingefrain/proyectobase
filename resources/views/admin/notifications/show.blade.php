@@ -10,14 +10,14 @@
             <div><dt>Estado</dt><dd>{{ ucfirst($outboxMessage->status) }}</dd></div>
             <div><dt>Categoría</dt><dd>{{ $outboxMessage->category }}</dd></div>
             <div><dt>Canal</dt><dd>{{ ucfirst($outboxMessage->channel) }}</dd></div>
-            <div><dt>Destinatario</dt><dd>{{ \App\Http\Controllers\Admin\NotificationController::maskedRecipient($outboxMessage->recipient) }}</dd></div>
+            <div><dt>Destinatario</dt><dd>{{ $maskedRecipient }}</dd></div>
             <div><dt>Plantilla</dt><dd>{{ $outboxMessage->template }}</dd></div>
             <div><dt>Intentos en ciclo</dt><dd>{{ $outboxMessage->attempts }} · ciclo {{ $outboxMessage->retry_generation + 1 }}</dd></div>
             <div><dt>Disponible desde</dt><dd>{{ $outboxMessage->available_at?->format('d/m/Y H:i:s') ?? '—' }}</dd></div>
             <div><dt>Enviado</dt><dd>{{ $outboxMessage->sent_at?->format('d/m/Y H:i:s') ?? '—' }}</dd></div>
             <div><dt>Correlación</dt><dd>{{ $outboxMessage->correlation_id ?? '—' }}</dd></div>
             <div class="detail-wide"><dt>Último error</dt><dd>{{ $outboxMessage->last_error_message ?? '—' }}@if($outboxMessage->last_error_type)<span class="muted"> ({{ $outboxMessage->last_error_type }})</span>@endif</dd></div>
-            <div class="detail-wide"><dt>Contenido del correo</dt><dd class="muted">Se omite por seguridad.</dd></div>
+            <div class="detail-wide"><dt>Contenido de la notificación</dt><dd class="muted">Se omite por seguridad.</dd></div>
         </dl>
         @can('notifications.retry')
             @if($outboxMessage->status === 'failed')

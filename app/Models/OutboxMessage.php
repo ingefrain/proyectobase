@@ -16,7 +16,9 @@ class OutboxMessage extends Model
 
     public const FAILED = 'failed';
 
-    public const STATUSES = [self::PENDING, self::PROCESSING, self::SENT, self::FAILED];
+    public const UNCERTAIN = 'uncertain';
+
+    public const STATUSES = [self::PENDING, self::PROCESSING, self::SENT, self::FAILED, self::UNCERTAIN];
 
     protected $fillable = [
         'uuid', 'category', 'channel', 'recipient', 'recipient_hash', 'template', 'payload',

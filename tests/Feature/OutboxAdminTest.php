@@ -29,7 +29,7 @@ class OutboxAdminTest extends TestCase
         $this->actingAsAdmin($admin)->get(route('admin.notifications.index', ['q' => 'PERSONA@example.test']))
             ->assertOk()->assertSee($message->uuid);
         $this->actingAsAdmin($admin)->get(route('admin.notifications.show', $message))
-            ->assertOk()->assertSee('Contenido del correo')->assertSee('Se omite por seguridad.')
+            ->assertOk()->assertSee('Contenido de la notificación')->assertSee('Se omite por seguridad.')
             ->assertDontSee('Hidden sensitive message body')
             ->assertDontSee('persona@example.test')
             ->assertSee('Error de entrega; detalles redactados.');

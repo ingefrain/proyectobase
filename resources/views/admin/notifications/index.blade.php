@@ -6,11 +6,11 @@
     <div class="page-intro"><p class="muted">Consulta entregas, reintentos y mensajes del sistema. El contenido se mantiene oculto.</p></div>
     <section class="panel">
         <form method="GET" action="{{ route('admin.notifications.index') }}" class="filter-bar" aria-label="Filtrar mensajes transaccionales">
-            <label class="filter-search" for="q">Buscar por ID, correlación o correo exacto<input id="q" name="q" type="search" value="{{ $filters['q'] ?? '' }}" maxlength="320"></label>
+            <label class="filter-search" for="q">Buscar por ID, correlación o destinatario<input id="q" name="q" type="search" value="{{ $filters['q'] ?? '' }}" maxlength="320"></label>
             <label for="status">Estado<select id="status" name="status"><option value="">Todos</option>
                 @foreach(\App\Models\OutboxMessage::STATUSES as $status)<option value="{{ $status }}" @selected(($filters['status'] ?? '') === $status)>{{ ucfirst($status) }}</option>@endforeach
             </select></label>
-            <label for="channel">Canal<select id="channel" name="channel"><option value="">Todos</option><option value="email" @selected(($filters['channel'] ?? '') === 'email')>Correo electrónico</option></select></label>
+            <label for="channel">Canal<select id="channel" name="channel"><option value="">Todos</option>@foreach($channels as $channel => $label)<option value="{{ $channel }}" @selected(($filters['channel'] ?? '') === $channel)>{{ $label }}</option>@endforeach</select></label>
             <div class="filter-actions"><button class="button button-primary button-small" type="submit">Aplicar</button><a class="button button-secondary button-small" href="{{ route('admin.notifications.index') }}">Limpiar</a></div>
         </form>
         @if($messages->isEmpty())

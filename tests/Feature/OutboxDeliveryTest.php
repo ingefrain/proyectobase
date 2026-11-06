@@ -8,6 +8,7 @@ use App\Models\OutboxAttempt;
 use App\Models\OutboxMessage;
 use App\Services\Outbox\OutboxDispatcher;
 use App\Services\Outbox\OutboxProcessor;
+use App\Services\Outbox\OutboxTransportResult;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use RuntimeException;
+use Tests\Support\FixedOutboxTransport;
 use Tests\TestCase;
 
 class OutboxDeliveryTest extends TestCase
@@ -69,8 +71,9 @@ class OutboxDeliveryTest extends TestCase
         $this->assertFalse($processor->process($message->id));
 
         $this->assertSame(OutboxMessage::SENT, $message->fresh()->status);
+        $this->assertSame($this->payload(), $message->fresh()->payload);
         $this->assertSame(1, $message->attemptsHistory()->count());
-        $this->assertSame('sent', $message->attemptsHistory()->first()->result);
+        $this->assertSame('accepted', $message->attemptsHistory()->first()->result);
         Mail::assertSent(TransactionalEmail::class, fn (TransactionalEmail $mail): bool => $mail->hasTo('persona@example.test'));
     }
 
@@ -144,7 +147,7 @@ class OutboxDeliveryTest extends TestCase
         ]);
 
         $this->assertTrue(app(OutboxProcessor::class)->process($message->id));
-        $this->assertSame(['sent', 'abandoned'], $message->attemptsHistory()->pluck('result')->all());
+        $this->assertSame(['accepted', 'abandoned'], $message->attemptsHistory()->pluck('result')->all());
         $this->assertSame(OutboxMessage::SENT, $message->fresh()->status);
     }
 
@@ -174,6 +177,33 @@ class OutboxDeliveryTest extends TestCase
         $this->assertSame(1, $message->attemptsHistory()->count());
         $this->assertSame('configuration', $message->fresh()->last_error_type);
         $this->assertStringNotContainsString('private', $message->fresh()->last_error_message);
+    }
+
+    public function test_uncertain_transport_result_is_terminal_and_is_not_retried_automatically(): void
+    {
+        config(['notifications.transports.test' => ['enabled' => true, 'class' => FixedOutboxTransport::class]]);
+        FixedOutboxTransport::$result = OutboxTransportResult::uncertain('test.unknown', 'delivery', 'Provider acceptance could not be confirmed.');
+        $message = app(OutboxDispatcher::class)->dispatch('test', 'generic.test.v1', 'recipient', ['message' => 'Hello']);
+
+        $this->assertFalse(app(OutboxProcessor::class)->process($message->id));
+        $this->assertSame(OutboxMessage::UNCERTAIN, $message->fresh()->status);
+        $this->assertSame('uncertain', $message->attemptsHistory()->firstOrFail()->result);
+        $this->assertFalse(app(OutboxProcessor::class)->process($message->id));
+        $this->assertSame(1, $message->attemptsHistory()->count());
+        FixedOutboxTransport::$result = null;
+    }
+
+    public function test_retryable_result_can_schedule_a_future_time_without_sleeping(): void
+    {
+        config(['notifications.transports.test' => ['enabled' => true, 'class' => FixedOutboxTransport::class]]);
+        $retryAt = now()->addMinutes(7);
+        FixedOutboxTransport::$result = OutboxTransportResult::retryable('test.limited', 'rate_limit', 'Provider rate limit reached.', $retryAt);
+        $message = app(OutboxDispatcher::class)->dispatch('test', 'generic.test.v1', 'recipient', ['message' => 'Hello']);
+
+        $this->assertFalse(app(OutboxProcessor::class)->process($message->id));
+        $this->assertSame($retryAt->timestamp, $message->fresh()->available_at->timestamp);
+        $this->assertSame('retryable_failure', $message->attemptsHistory()->firstOrFail()->result);
+        FixedOutboxTransport::$result = null;
     }
 
     public function test_sync_outbox_command_sends_ready_messages_through_the_same_processor(): void

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\OutboxMessage;
 use App\Services\Outbox\OutboxDispatcher;
+use App\Services\Outbox\OutboxTransportResolver;
 use App\Support\AdminAuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,11 +15,12 @@ use Illuminate\View\View;
 
 class NotificationController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, OutboxTransportResolver $transports): View
     {
+        $channels = $transports->enabledChannels();
         $filters = $request->validate([
             'status' => ['nullable', Rule::in(OutboxMessage::STATUSES)],
-            'channel' => ['nullable', Rule::in(['email'])],
+            'channel' => ['nullable', Rule::in(array_keys($channels))],
             'q' => ['nullable', 'string', 'max:320'],
         ]);
         $term = trim((string) ($filters['q'] ?? ''));
@@ -27,24 +29,41 @@ class NotificationController extends Controller
             ->when($filters['channel'] ?? null, fn ($builder, string $channel) => $builder->where('channel', $channel));
 
         if ($term !== '') {
-            $query->where(function ($builder) use ($term): void {
-                $builder->where('uuid', $term)->orWhere('correlation_id', $term);
-                if (filter_var(mb_strtolower($term), FILTER_VALIDATE_EMAIL) !== false) {
-                    $builder->orWhere('recipient_hash', hash('sha256', mb_strtolower($term)));
+            $recipientHashes = [];
+            foreach (array_keys($channels) as $channel) {
+                try {
+                    $normalizedRecipient = $transports->resolve($channel)->normalizeRecipient($term);
+                    $recipientHashes[] = hash('sha256', $normalizedRecipient);
+                } catch (\InvalidArgumentException) {
+                    // The term is not a valid recipient for this enabled channel.
+                }
+            }
+            $query->where(function ($builder) use ($term, $recipientHashes): void {
+                $builder->where(function ($ids) use ($term): void {
+                    $ids->where('uuid', $term)->orWhere('correlation_id', $term);
+                });
+                if ($recipientHashes !== []) {
+                    $builder->orWhereIn('recipient_hash', $recipientHashes);
                 }
             });
         }
 
         $messages = $query->latest('created_at')->paginate(20)->withQueryString();
 
-        return view('admin.notifications.index', compact('messages', 'filters'));
+        return view('admin.notifications.index', compact('messages', 'filters', 'channels'));
     }
 
-    public function show(OutboxMessage $outboxMessage): View
+    public function show(OutboxMessage $outboxMessage, OutboxTransportResolver $transports): View
     {
         $outboxMessage->load('attemptsHistory');
+        $maskedRecipient = '—';
+        try {
+            $maskedRecipient = $transports->resolve($outboxMessage->channel)->maskRecipient($outboxMessage->recipient);
+        } catch (\InvalidArgumentException) {
+            // Unknown or disabled channels never reveal their stored recipient.
+        }
 
-        return view('admin.notifications.show', compact('outboxMessage'));
+        return view('admin.notifications.show', compact('outboxMessage', 'maskedRecipient'));
     }
 
     public function retry(
@@ -89,13 +108,6 @@ class NotificationController extends Controller
 
     public static function maskedRecipient(string $recipient): string
     {
-        [$local, $domain] = array_pad(explode('@', $recipient, 2), 2, '');
-        if ($local === '' || $domain === '') {
-            return '—';
-        }
-        $domainParts = explode('.', $domain);
-        $domainParts[0] = mb_substr($domainParts[0], 0, 1).'***';
-
-        return mb_substr($local, 0, 1).'***@'.implode('.', $domainParts);
+        return app(OutboxTransportResolver::class)->resolve('email')->maskRecipient($recipient);
     }
 }
