@@ -49,6 +49,9 @@ class NotificationController extends Controller
         }
 
         $messages = $query->latest('created_at')->paginate(20)->withQueryString();
+        $messages->getCollection()->each(function (OutboxMessage $message) use ($transports): void {
+            $message->setAttribute('masked_recipient', $this->maskedRecipientFor($transports, $message->channel, $message->recipient));
+        });
 
         return view('admin.notifications.index', compact('messages', 'filters', 'channels'));
     }
@@ -56,12 +59,7 @@ class NotificationController extends Controller
     public function show(OutboxMessage $outboxMessage, OutboxTransportResolver $transports): View
     {
         $outboxMessage->load('attemptsHistory');
-        $maskedRecipient = '—';
-        try {
-            $maskedRecipient = $transports->resolve($outboxMessage->channel)->maskRecipient($outboxMessage->recipient);
-        } catch (\InvalidArgumentException) {
-            // Unknown or disabled channels never reveal their stored recipient.
-        }
+        $maskedRecipient = $this->maskedRecipientFor($transports, $outboxMessage->channel, $outboxMessage->recipient);
 
         return view('admin.notifications.show', compact('outboxMessage', 'maskedRecipient'));
     }
@@ -109,5 +107,15 @@ class NotificationController extends Controller
     public static function maskedRecipient(string $recipient): string
     {
         return app(OutboxTransportResolver::class)->resolve('email')->maskRecipient($recipient);
+    }
+
+    private function maskedRecipientFor(OutboxTransportResolver $transports, string $channel, string $recipient): string
+    {
+        try {
+            return $transports->resolve($channel)->maskRecipient($recipient);
+        } catch (\InvalidArgumentException) {
+            // Unknown or disabled channels never reveal their stored recipient.
+            return '—';
+        }
     }
 }

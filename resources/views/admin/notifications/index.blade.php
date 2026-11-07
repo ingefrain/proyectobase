@@ -23,7 +23,7 @@
                     <tr>
                         <td><time datetime="{{ $message->created_at->toIso8601String() }}">{{ $message->created_at->format('d/m/Y H:i') }}</time></td>
                         <td><code>{{ $message->uuid }}</code></td>
-                        <td>{{ \App\Http\Controllers\Admin\NotificationController::maskedRecipient($message->recipient) }}</td>
+                        <td>{{ $message->masked_recipient }}</td>
                         <td>{{ ucfirst($message->channel) }}</td>
                         <td><span class="badge {{ $message->status === 'sent' ? 'badge-success' : ($message->status === 'failed' ? 'badge-danger' : 'badge-neutral') }}">{{ ucfirst($message->status) }}</span></td>
                         <td>{{ $message->attempts }}<span class="muted"> · ciclo {{ $message->retry_generation + 1 }}</span></td>

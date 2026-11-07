@@ -1,6 +1,7 @@
 <?php
 
 use App\Services\Outbox\EmailOutboxTransport;
+use App\Services\Outbox\TelegramOutboxTransport;
 
 return [
     'transports' => [
@@ -8,6 +9,11 @@ return [
             'enabled' => true,
             'label' => 'Correo electrónico',
             'class' => EmailOutboxTransport::class,
+        ],
+        'telegram' => [
+            'enabled' => (bool) env('TELEGRAM_ENABLED', false),
+            'label' => 'Telegram',
+            'class' => TelegramOutboxTransport::class,
         ],
     ],
     'branding' => [

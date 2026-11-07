@@ -27,6 +27,18 @@ class OutboxDispatcher
         return $this->dispatch('email', 'generic.email.v1', $recipient, $payload, $category, $idempotencyKey, $correlationId);
     }
 
+    public function telegram(
+        string $text,
+        ?string $recipient = null,
+        string $category = 'transactional',
+        ?string $idempotencyKey = null,
+        ?string $correlationId = null,
+    ): OutboxMessage {
+        $recipient ??= (string) config('services.telegram.default_chat_id', '');
+
+        return $this->dispatch('telegram', 'telegram.text.v1', $recipient, ['text' => $text], $category, $idempotencyKey, $correlationId);
+    }
+
     /** @param array<string, mixed> $payload */
     public function dispatch(
         string $channel,

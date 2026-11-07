@@ -2,6 +2,20 @@
 
 return [
 
+    'telegram' => [
+        'enabled' => env('TELEGRAM_ENABLED', false),
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'default_chat_id' => env('TELEGRAM_DEFAULT_CHAT_ID'),
+        'allowed_chat_ids' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', trim((string) env('TELEGRAM_ALLOWED_CHAT_IDS', '')) !== ''
+                ? (string) env('TELEGRAM_ALLOWED_CHAT_IDS')
+                : (string) env('TELEGRAM_DEFAULT_CHAT_ID', '')),
+        ))),
+        'connect_timeout' => (int) env('TELEGRAM_CONNECT_TIMEOUT', 5),
+        'timeout' => (int) env('TELEGRAM_TIMEOUT', 10),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services
