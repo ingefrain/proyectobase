@@ -31,6 +31,20 @@ return [
             'permission' => 'documents.view',
         ],
         [
+            'title' => 'Organizaciones',
+            'description' => 'Gestiona empresas, instituciones o unidades principales.',
+            'action' => 'Administrar organizaciones',
+            'route' => 'admin.organizations.index',
+            'permission' => 'organizations.view',
+        ],
+        [
+            'title' => 'Sedes',
+            'description' => 'Gestiona ubicaciones asociadas a una organización.',
+            'action' => 'Administrar sedes',
+            'route' => 'admin.locations.index',
+            'permission' => 'locations.view',
+        ],
+        [
             'title' => 'Identidad visual',
             'description' => 'Configura el nombre y logotipo mostrados por la aplicación.',
             'action' => 'Personalizar identidad visual',

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Document;
+use App\Models\Location;
+use App\Models\Organization;
 use App\Services\Documents\DocumentOwnerAccess;
 use App\Services\Documents\DocumentService;
 use App\Services\Documents\ManagedDocumentPath;
@@ -138,6 +140,13 @@ class DocumentController extends Controller
         }
 
         $label = $owner->getAttribute('name') ?: $owner->getAttribute('title');
+
+        if ($owner instanceof Organization) {
+            return 'Organización — '.(string) $owner->name;
+        }
+        if ($owner instanceof Location) {
+            return 'Sede — '.(string) $owner->name;
+        }
 
         return class_basename($owner).' — '.(is_string($label) && $label !== '' ? $label : 'Registro asociado');
     }

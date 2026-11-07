@@ -5,8 +5,12 @@ namespace App\Providers;
 use App\Contracts\OutboxEmailSender;
 use App\Mail\LaravelOutboxEmailSender;
 use App\Models\Document;
+use App\Models\Location;
+use App\Models\Organization;
 use App\Models\User;
 use App\Policies\DocumentPolicy;
+use App\Policies\LocationPolicy;
+use App\Policies\OrganizationPolicy;
 use App\Support\BasePermissions;
 use App\Support\ImpersonationManager;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -29,6 +33,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Document::class, DocumentPolicy::class);
+        Gate::policy(Organization::class, OrganizationPolicy::class);
+        Gate::policy(Location::class, LocationPolicy::class);
 
         Gate::before(function (User $user, string $ability): ?bool {
             $impersonation = app(ImpersonationManager::class);

@@ -3,7 +3,7 @@
 @section('title', 'Documentos')
 
 @section('content')
-    <div class="page-intro admin-content-wide"><p class="muted">Los archivos se almacenan de forma privada. La lista muestra documentos asociados a tu cuenta; los proyectos derivados pueden ampliar el acceso por entidad.</p></div>
+    <div class="page-intro admin-content-wide"><p class="muted">Los archivos se almacenan de forma privada. Aquí aparecen los documentos de tu cuenta y de las entidades que puedes consultar.</p></div>
 
     @can('documents.upload')
         <section class="panel admin-content-wide" aria-labelledby="document-upload-heading">

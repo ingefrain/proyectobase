@@ -4,6 +4,8 @@ namespace App\Services\Documents;
 
 use App\Models\ApplicationBranding;
 use App\Models\Document;
+use App\Models\Location;
+use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -46,6 +48,12 @@ class DocumentOwnerAccess
                     $branding->where('documentable_type', (new ApplicationBranding)->getMorphClass())
                         ->where('documentable_id', '1');
                 });
+            }
+            if ($actor->can('organizations.view')) {
+                $builder->orWhere('documentable_type', (new Organization)->getMorphClass());
+            }
+            if ($actor->can('locations.view')) {
+                $builder->orWhere('documentable_type', (new Location)->getMorphClass());
             }
         });
     }

@@ -9,8 +9,11 @@ use App\Http\Controllers\Admin\BrandingController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\ImpersonationController;
+use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\LoginSecurityController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\OrganizationController;
+use App\Http\Controllers\Admin\OrganizationLogoController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
@@ -83,5 +86,21 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/documents/{document:uuid}/download', [DocumentController::class, 'download'])->middleware('can:documents.download')->name('documents.download');
         Route::put('/documents/{document:uuid}', [DocumentController::class, 'update'])->middleware('can:documents.update')->name('documents.update');
         Route::delete('/documents/{document:uuid}', [DocumentController::class, 'destroy'])->middleware('can:documents.delete')->name('documents.destroy');
+
+        Route::get('/organizations', [OrganizationController::class, 'index'])->middleware('can:organizations.view')->name('organizations.index');
+        Route::get('/organizations/create', [OrganizationController::class, 'create'])->middleware('can:organizations.create')->name('organizations.create');
+        Route::post('/organizations', [OrganizationController::class, 'store'])->middleware('can:organizations.create')->name('organizations.store');
+        Route::get('/organizations/{organization}/logo', OrganizationLogoController::class)->middleware('can:organizations.view')->name('organizations.logo');
+        Route::get('/organizations/{organization}/edit', [OrganizationController::class, 'edit'])->middleware('can:organizations.update')->name('organizations.edit');
+        Route::put('/organizations/{organization}', [OrganizationController::class, 'update'])->middleware('can:organizations.update')->name('organizations.update');
+        Route::delete('/organizations/{organization}/logo', [OrganizationController::class, 'deleteLogo'])->middleware('can:organizations.update')->name('organizations.logo.delete');
+        Route::patch('/organizations/{organization}/status', [OrganizationController::class, 'toggleStatus'])->middleware('can:organizations.disable')->name('organizations.status');
+
+        Route::get('/locations', [LocationController::class, 'index'])->middleware('can:locations.view')->name('locations.index');
+        Route::get('/locations/create', [LocationController::class, 'create'])->middleware('can:locations.create')->name('locations.create');
+        Route::post('/locations', [LocationController::class, 'store'])->middleware('can:locations.create')->name('locations.store');
+        Route::get('/locations/{location}/edit', [LocationController::class, 'edit'])->middleware('can:locations.update')->name('locations.edit');
+        Route::put('/locations/{location}', [LocationController::class, 'update'])->middleware('can:locations.update')->name('locations.update');
+        Route::patch('/locations/{location}/status', [LocationController::class, 'toggleStatus'])->middleware('can:locations.disable')->name('locations.status');
     });
 });

@@ -39,10 +39,19 @@ return [
                 'image/webp' => ['webp'],
             ],
         ],
+        'organization.logo' => [
+            'max_size_kb' => (int) env('ORGANIZATION_LOGO_MAX_SIZE_KB', 5120),
+            'allowed_mime_types' => [
+                'image/jpeg' => ['jpg', 'jpeg'],
+                'image/png' => ['png'],
+                'image/webp' => ['webp'],
+            ],
+        ],
     ],
     'category_labels' => [
         'user.avatar' => 'Foto de perfil',
         'branding.logo' => 'Logotipo del sistema',
+        'organization.logo' => 'Logotipo de organización',
     ],
     'image_max_input_pixels' => (int) env('DOCUMENTS_IMAGE_MAX_INPUT_PIXELS', 16000000),
     'image_processing' => [
@@ -60,6 +69,14 @@ return [
             'quality' => (int) env('BRANDING_LOGO_WEBP_QUALITY', 85),
             'max_width' => (int) env('BRANDING_LOGO_MAX_WIDTH', 1600),
             'max_height' => (int) env('BRANDING_LOGO_MAX_HEIGHT', 1600),
+            'on_unsupported' => 'error',
+        ],
+        'organization.logo' => [
+            'enabled' => true,
+            'format' => 'webp',
+            'quality' => (int) env('ORGANIZATION_LOGO_WEBP_QUALITY', 85),
+            'max_width' => (int) env('ORGANIZATION_LOGO_MAX_WIDTH', 1600),
+            'max_height' => (int) env('ORGANIZATION_LOGO_MAX_HEIGHT', 1600),
             'on_unsupported' => 'error',
         ],
     ],

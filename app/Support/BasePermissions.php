@@ -29,8 +29,14 @@ class BasePermissions
         'documents.update' => 'Actualizar metadata y reemplazar documentos',
         'documents.delete' => 'Marcar documentos para eliminación',
         'branding.manage' => 'Administrar nombre y logotipo de la aplicación',
-        'notifications.view' => 'Consultar mensajes transaccionales y sus intentos',
-        'notifications.retry' => 'Reintentar mensajes transaccionales fallidos',
+        'organizations.view' => 'Consultar organizaciones',
+        'organizations.create' => 'Crear organizaciones',
+        'organizations.update' => 'Editar organizaciones',
+        'organizations.disable' => 'Activar o desactivar organizaciones',
+        'locations.view' => 'Consultar sedes',
+        'locations.create' => 'Crear sedes',
+        'locations.update' => 'Editar sedes',
+        'locations.disable' => 'Activar o desactivar sedes',
     ];
 
     /** @var list<string> */

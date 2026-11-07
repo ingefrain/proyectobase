@@ -29,14 +29,14 @@ class AvatarController extends Controller
         return $this->image($document, $user, $paths, false, $request);
     }
 
-    public static function response(Document $document, ManagedDocumentPath $paths, bool $public, Request $request): StreamedResponse
+    public static function response(Document $document, ManagedDocumentPath $paths, bool $public, Request $request, ?string $category = null): StreamedResponse
     {
-        return (new self)->image($document, null, $paths, $public, $request);
+        return (new self)->image($document, null, $paths, $public, $request, $category);
     }
 
-    private function image(Document $document, ?User $owner, ManagedDocumentPath $paths, bool $public, Request $request): StreamedResponse
+    private function image(Document $document, ?User $owner, ManagedDocumentPath $paths, bool $public, Request $request, ?string $category = null): StreamedResponse
     {
-        abort_unless($document->category === ($public ? 'branding.logo' : 'user.avatar'), 404);
+        abort_unless($document->category === ($category ?? ($public ? 'branding.logo' : 'user.avatar')), 404);
         if ($owner && (! ($document->documentable instanceof User) || ! $document->documentable->is($owner))) {
             abort(404);
         }
