@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="page-intro"><div><p class="eyebrow">Roles</p><p class="muted">Las acciones disponibles se comprueban en el sistema.</p></div><a class="button button-secondary" href="{{ route('admin.roles.index') }}">Volver a roles</a></div>
-    <section class="panel form-panel">
+    <section class="panel form-panel admin-form-surface admin-form-surface-wide">
         <form method="POST" action="{{ $creating ? route('admin.roles.store') : route('admin.roles.update', $role) }}" class="stack-form">
             @csrf
             @unless($creating) @method('PUT') @endunless

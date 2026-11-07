@@ -8,6 +8,7 @@
     'instructions' => 'Arrastra un archivo aquí o haz clic para seleccionarlo.',
     'typesLabel' => null,
     'id' => null,
+    'errorId' => null,
 ])
 @php
     $controlId = $id ?: 'upload-'.str_replace(['[', ']'], '-', $name);
@@ -22,7 +23,7 @@
         <strong>{{ $instructions }}</strong>
         <small>{{ $typesLabel ?: ($formats ?: 'Cualquier tipo permitido') }} · máximo {{ $maximumMb }} MB</small>
         <span class="button button-secondary button-small" aria-hidden="true">{{ $label }}</span>
-        <input class="file-dropzone-input" id="{{ $controlId }}" name="{{ $name }}" type="file" accept="{{ $accept }}" aria-describedby="{{ $controlId }}-upload-error {{ $name }}-error" @required($required)>
+        <input class="file-dropzone-input" id="{{ $controlId }}" name="{{ $name }}" type="file" accept="{{ $accept }}" aria-describedby="{{ $controlId }}-upload-error {{ $errorId ?: $name.'-error' }}" @required($required)>
     </label>
     <div class="file-dropzone-selection" data-selection hidden>
         <img data-preview hidden alt="Vista previa del archivo seleccionado">
@@ -30,5 +31,5 @@
         <button class="button button-secondary button-small" type="button" data-clear-file>Quitar selección</button>
     </div>
     <p class="field-error" id="{{ $controlId }}-upload-error" data-upload-error role="alert" hidden></p>
-    <x-admin.field-error :name="$name" />
+    <x-admin.field-error :name="$name" :id="$errorId" />
 </div>

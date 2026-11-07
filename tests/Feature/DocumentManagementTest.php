@@ -32,6 +32,18 @@ class DocumentManagementTest extends TestCase
         config(['documents.disk' => 'local']);
     }
 
+    public function test_documents_screen_uses_the_reusable_dropzone_for_upload_and_replacement(): void
+    {
+        $admin = $this->adminUser();
+
+        $this->actingAsAdmin($admin)->get(route('admin.documents.index'))
+            ->assertOk()
+            ->assertSee('data-file-dropzone', false)
+            ->assertSee('name="file"', false)
+            ->assertSee('application/pdf,image/jpeg,image/png,text/plain,text/csv', false)
+            ->assertSee('data-dropzone', false);
+    }
+
     public function test_upload_stores_private_uuid_file_and_polymorphic_metadata_with_checksum_and_audit(): void
     {
         $admin = $this->adminUser();

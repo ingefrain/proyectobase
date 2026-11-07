@@ -90,7 +90,7 @@ class UserController extends Controller
             return $user;
         });
 
-        return redirect()->route('admin.users.edit', $user)->with('status', 'Usuario creado.');
+        return redirect()->route('admin.users.edit', $user)->with('status', 'Usuario creado correctamente.');
     }
 
     public function edit(User $user): View

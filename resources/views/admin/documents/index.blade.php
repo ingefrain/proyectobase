@@ -3,14 +3,14 @@
 @section('title', 'Documentos')
 
 @section('content')
-    <div class="page-intro"><p class="muted">Los archivos se almacenan de forma privada. La lista muestra documentos asociados a tu cuenta; los proyectos derivados pueden ampliar el acceso por entidad.</p></div>
+    <div class="page-intro admin-content-wide"><p class="muted">Los archivos se almacenan de forma privada. La lista muestra documentos asociados a tu cuenta; los proyectos derivados pueden ampliar el acceso por entidad.</p></div>
 
     @can('documents.upload')
-        <section class="panel" aria-labelledby="document-upload-heading">
+        <section class="panel admin-content-wide" aria-labelledby="document-upload-heading">
             <h2 id="document-upload-heading">Subir documento</h2>
             <form method="POST" action="{{ route('admin.documents.store') }}" enctype="multipart/form-data" class="stack-form">
                 @csrf
-                <label for="document-file">Archivo<input id="document-file" name="file" type="file" required accept=".pdf,.jpg,.jpeg,.png,.txt,.csv"></label>
+                <x-admin.dropzone name="file" label="Seleccionar archivo" :accept="'.pdf,.jpg,.jpeg,.png,.txt,.csv,application/pdf,image/jpeg,image/png,text/plain,text/csv'" :mime-types="array_keys(config('documents.allowed_mime_types'))" :max-size-kb="config('documents.max_size_kb')" types-label="PDF, JPEG, PNG, TXT o CSV" instructions="Arrastra un archivo aquí o selecciónalo." required />
                 <label for="document-category">Categoría<input id="document-category" name="category" value="{{ old('category') }}" required maxlength="100" autocomplete="off" placeholder="Ejemplo: contract"></label>
                 <label for="document-title">Título opcional<input id="document-title" name="title" value="{{ old('title') }}" maxlength="200"></label>
                 <label for="document-description">Descripción opcional<textarea id="document-description" name="description" maxlength="4000" rows="2">{{ old('description') }}</textarea></label>
@@ -20,7 +20,7 @@
         </section>
     @endcan
 
-    <section class="panel">
+    <section class="panel admin-content-wide">
         <form method="GET" action="{{ route('admin.documents.index') }}" class="filter-bar" aria-label="Filtrar documentos">
             <label class="filter-search" for="q">Buscar<input id="q" name="q" type="search" value="{{ $filters['q'] ?? '' }}" maxlength="180" placeholder="Nombre, título o categoría"></label>
             <label for="category">Categoría<select id="category" name="category"><option value="">Todas</option>@foreach($categories as $category)<option value="{{ $category['key'] }}" @selected(($filters['category'] ?? '') === $category['key'])>{{ $category['label'] }}</option>@endforeach</select></label>
@@ -53,7 +53,7 @@
                                         <label for="category-{{ $document->uuid }}">Categoría<input id="category-{{ $document->uuid }}" name="category" value="{{ $document->category }}" required maxlength="100"></label>
                                         <label for="title-{{ $document->uuid }}">Título<input id="title-{{ $document->uuid }}" name="title" value="{{ $document->title }}" maxlength="200"></label>
                                         <label for="description-{{ $document->uuid }}">Descripción<textarea id="description-{{ $document->uuid }}" name="description" maxlength="4000" rows="2">{{ $document->description }}</textarea></label>
-                                        <label for="replacement-{{ $document->uuid }}">Reemplazar archivo opcional<input id="replacement-{{ $document->uuid }}" name="file" type="file" accept=".pdf,.jpg,.jpeg,.png,.txt,.csv"></label>
+                                        <x-admin.dropzone name="file" label="Seleccionar reemplazo" :accept="'.pdf,.jpg,.jpeg,.png,.txt,.csv,application/pdf,image/jpeg,image/png,text/plain,text/csv'" :mime-types="array_keys(config('documents.allowed_mime_types'))" :max-size-kb="config('documents.max_size_kb')" types-label="PDF, JPEG, PNG, TXT o CSV" instructions="Arrastra un reemplazo o selecciónalo." :id="'replacement-'.$document->uuid" :error-id="'replacement-'.$document->uuid.'-error'" />
                                         <button class="button button-primary button-small" type="submit">Guardar cambios</button>
                                     </form>
                                 </details>

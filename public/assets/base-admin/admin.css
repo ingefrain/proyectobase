@@ -311,3 +311,56 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--teal); }
 .audit-values>strong{display:block;margin-top:10px}
 .badge-warning{color:#614b0c;background:#fff0b8}
 @media(max-width:620px){.impersonation-banner{align-items:stretch;flex-direction:column;gap:9px;padding:11px 15px}.impersonation-banner>div{display:grid;gap:3px}.impersonation-banner form,.impersonation-banner .button{width:100%}}
+
+/* Shared administrative form and content layouts */
+.admin-content-wide{width:100%;max-width:none}
+.admin-form-surface{width:min(100%,1120px);max-width:none;margin-inline:auto}
+.admin-form-surface-wide{width:min(100%,1320px)}
+.admin-form-surface-branding{width:min(100%,860px)}
+.admin-form-grid{align-items:start;gap:18px 24px}
+.admin-form-grid>.field{min-width:0}
+.admin-form-grid .field-hint{min-height:1.2em}
+.admin-form-surface .password-checklist{grid-column:1/-1;grid-template-columns:1fr;gap:7px;margin:0;padding:0;list-style:none}
+.admin-form-surface .password-checklist li{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:.84rem}
+.admin-form-surface .password-checklist li>span:first-child{width:1.1rem;flex:none;text-align:center;font-weight:800}
+.admin-form-surface .password-checklist .is-valid{color:var(--success)}
+.admin-form-surface .password-checklist .is-invalid{color:var(--danger)}
+.admin-form-surface .password-limit-warning{grid-column:1/-1;margin:0;color:var(--danger);font-size:.87rem;font-weight:650}
+.password-input-wrap{width:100%;min-width:0}
+.role-assignment{margin-top:4px}
+.role-native-label{display:block;margin:0 0 5px;font-size:.8rem;font-weight:700}
+.role-assignment select[multiple][hidden]{display:none}
+.role-enhanced{display:grid;gap:7px}
+.role-enhanced[hidden]{display:none}
+.role-chips{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.role-chips:empty{display:none}
+.role-chip{display:inline-flex;max-width:100%;align-items:center;gap:5px;padding:3px 5px 3px 9px;border-radius:999px;color:#284a5e;background:#eaf1f5;font-size:.78rem;font-weight:650}
+.role-chip>span{overflow-wrap:anywhere}
+.role-chip button{width:22px;height:22px;padding:0;border:0;border-radius:50%;color:#284a5e;background:transparent;font-size:1.1rem;line-height:1;cursor:pointer}
+.role-chip button:hover{background:#d8e5eb}
+.role-picker-toggle{display:flex;width:100%;min-height:43px;align-items:center;justify-content:space-between;padding:9px 12px;border:1px solid #bdcbd3;border-radius:8px;color:#355163;background:white;text-align:left;cursor:pointer}
+.role-picker-toggle::after{content:'⌄';color:#617384;font-size:1.15rem}
+.role-picker-toggle[aria-expanded=true]::after{content:'⌃'}
+.role-picker-toggle:hover{border-color:#8aa7b3;background:#fbfcfd}
+.role-dropdown-panel{display:grid;gap:8px;padding:9px;border:1px solid var(--line);border-radius:9px;background:white;box-shadow:0 8px 20px rgb(20 47 64 / 7%)}
+.role-dropdown-panel[hidden]{display:none}
+.role-options{display:grid;max-height:220px;gap:2px;overflow:auto;padding:5px;border:1px solid var(--line);border-radius:8px;background:#fbfcfd}
+.role-option{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:6px;font-size:.84rem;font-weight:500;cursor:pointer}
+.role-option:hover{background:#eef4f6}
+.role-option input[type=checkbox]{flex:none;margin:0}
+.admin-metrics-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.admin-metrics-grid .metric-card{min-width:0;padding:18px}
+.admin-metrics-grid .metric-card span{overflow-wrap:anywhere}
+.permission-list.admin-content-wide{max-width:none}
+.status-panel.admin-content-wide{max-width:none}
+.admin-content-wide .system-status-list{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:900px){.admin-content-wide .system-status-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1050px){.admin-metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){
+    .admin-form-surface,.admin-form-surface-wide,.admin-form-surface-branding{width:100%}
+    .admin-form-grid{grid-template-columns:1fr;gap:13px}
+    .admin-form-grid .field-hint{min-height:0}
+    .admin-metrics-grid{grid-template-columns:1fr}
+    .admin-content-wide .system-status-list{grid-template-columns:1fr}
+    .role-options{max-height:190px}
+}

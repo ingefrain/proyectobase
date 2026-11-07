@@ -46,7 +46,21 @@ class AdminAuthorizationAndManagementTest extends TestCase
         $role = Role::query()->where('key', 'administrator')->firstOrFail();
 
         $this->actingAsAdmin($admin)->get(route('admin.dashboard'))->assertOk()->assertSee('Proyecto Base');
-        $this->actingAsAdmin($admin)->get(route('admin.users.create'))->assertOk()->assertSee('Crear usuario');
+        $this->actingAsAdmin($admin)->get(route('admin.users.create'))
+            ->assertOk()->assertSee('Crear usuario')
+            ->assertSee('data-password-policy', false)
+            ->assertSee('data-password-toggle', false)
+            ->assertSee('data-password-limit', false)
+            ->assertSee('name="role_ids[]"', false)
+            ->assertSee('data-role-selector', false)
+            ->assertSee('Selecciona uno o más roles para este usuario.');
+        $target = User::factory()->create();
+        $editResponse = $this->actingAsAdmin($admin)->get(route('admin.users.edit', $target))
+            ->assertOk()
+            ->assertSee('data-password-optional="true"', false)
+            ->assertSee('data-password-checklist', false)
+            ->assertSee('data-password-toggle', false);
+        $this->assertMatchesRegularExpression('/<ul[^>]*data-password-checklist[^>]*\shidden\b/', $editResponse->getContent());
         $this->actingAsAdmin($admin)->get(route('admin.roles.create'))->assertOk()->assertSee('Crear rol');
         $this->actingAsAdmin($admin)->get(route('admin.roles.edit', $role))->assertOk()->assertSee('Permisos');
         $this->actingAsAdmin($admin)->get(route('admin.permissions.index'))->assertOk()->assertSee('users.disable');
@@ -65,7 +79,8 @@ class AdminAuthorizationAndManagementTest extends TestCase
             'password_confirmation' => 'Clave-segura-1234!',
             'role_assignment_present' => '1',
             'role_ids' => [$operator->id],
-        ])->assertRedirect();
+        ])->assertRedirect(route('admin.users.edit', User::query()->where('email', 'ana@example.test')->value('id')))
+            ->assertSessionHas('status', 'Usuario creado correctamente.');
 
         $user = User::query()->where('email', 'ana@example.test')->firstOrFail();
         $this->assertTrue(Hash::check('Clave-segura-1234!', $user->password));
@@ -82,6 +97,50 @@ class AdminAuthorizationAndManagementTest extends TestCase
 
         $this->assertDatabaseHas('users', ['id' => $user->id, 'name' => 'Ana Editada']);
         $this->assertCount(0, $user->fresh()->roles);
+    }
+
+    public function test_admin_can_create_and_edit_a_user_with_multiple_roles(): void
+    {
+        $admin = $this->adminUser();
+        $operator = Role::query()->where('key', 'operator')->firstOrFail();
+        $support = Role::query()->create(['name' => 'Soporte', 'key' => 'support', 'is_active' => true]);
+
+        $this->actingAsAdmin($admin)->post(route('admin.users.store'), [
+            'name' => 'Multirrol',
+            'email' => 'multirrol@example.test',
+            'password' => 'Clave-segura-1234!',
+            'password_confirmation' => 'Clave-segura-1234!',
+            'role_assignment_present' => '1',
+            'role_ids' => [$operator->id, $support->id],
+        ])->assertRedirect();
+
+        $user = User::query()->where('email', 'multirrol@example.test')->firstOrFail();
+        $this->assertEqualsCanonicalizing([$operator->id, $support->id], $user->roles()->pluck('roles.id')->all());
+
+        $this->actingAsAdmin($admin)->put(route('admin.users.update', $user), [
+            'name' => 'Multirrol actualizado',
+            'email' => $user->email,
+            'role_assignment_present' => '1',
+            'role_ids' => [$support->id],
+        ])->assertRedirect(route('admin.users.edit', $user));
+
+        $this->assertSame([$support->id], $user->fresh()->roles()->pluck('roles.id')->all());
+    }
+
+    public function test_user_role_assignment_rejects_unknown_role_ids(): void
+    {
+        $admin = $this->adminUser();
+
+        $this->actingAsAdmin($admin)->post(route('admin.users.store'), [
+            'name' => 'Invalid role',
+            'email' => 'invalid-role@example.test',
+            'password' => 'Clave-segura-1234!',
+            'password_confirmation' => 'Clave-segura-1234!',
+            'role_assignment_present' => '1',
+            'role_ids' => [999999],
+        ])->assertSessionHasErrors('role_ids.0');
+
+        $this->assertDatabaseMissing('users', ['email' => 'invalid-role@example.test']);
     }
 
     public function test_user_without_role_assignment_permission_cannot_manipulate_role_ids(): void

@@ -63,6 +63,84 @@
         window.addEventListener('pagehide', () => setVisible(false));
     });
 
+    document.querySelectorAll('[data-role-selector]').forEach(selector => {
+        const native = selector.querySelector('select[multiple]');
+        const enhanced = selector.querySelector('[data-role-enhanced]');
+        const chips = selector.querySelector('[data-role-chips]');
+        const search = selector.querySelector('[data-role-search]');
+        const options = selector.querySelector('[data-role-options]');
+        const toggle = selector.querySelector('[data-role-toggle]');
+        const dropdown = selector.querySelector('[data-role-dropdown]');
+        if (!native || !enhanced || !chips || !search || !options || !toggle || !dropdown || !native.options.length) return;
+
+        const render = () => {
+            chips.replaceChildren();
+            [...native.selectedOptions].forEach(option => {
+                const chip = document.createElement('span');
+                chip.className = 'role-chip';
+                const label = document.createElement('span');
+                label.textContent = option.textContent;
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.textContent = '×';
+                remove.setAttribute('aria-label', `Quitar rol ${option.textContent}`);
+                remove.addEventListener('click', () => {
+                    option.selected = false;
+                    render();
+                });
+                chip.append(label, remove);
+                chips.append(chip);
+            });
+
+            options.replaceChildren();
+            const query = search.value.trim().toLocaleLowerCase();
+            [...native.options].forEach(option => {
+                if (!option.textContent.toLocaleLowerCase().includes(query)) return;
+                const label = document.createElement('label');
+                label.className = 'role-option';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = option.selected;
+                checkbox.value = option.value;
+                checkbox.addEventListener('change', () => {
+                    option.selected = checkbox.checked;
+                    render();
+                    search.focus({ preventScroll: true });
+                });
+                const text = document.createElement('span');
+                text.textContent = option.textContent;
+                label.append(checkbox, text);
+                options.append(label);
+            });
+            if (!options.childElementCount) {
+                const empty = document.createElement('p');
+                empty.className = 'field-hint';
+                empty.textContent = 'No hay roles que coincidan.';
+                options.append(empty);
+            }
+        };
+
+        native.addEventListener('change', render);
+        search.addEventListener('input', render);
+        toggle.addEventListener('click', () => {
+            const expanded = toggle.getAttribute('aria-expanded') !== 'true';
+            toggle.setAttribute('aria-expanded', String(expanded));
+            dropdown.hidden = !expanded;
+            if (expanded) search.focus({ preventScroll: true });
+        });
+        selector.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && !dropdown.hidden) {
+                dropdown.hidden = true;
+                toggle.setAttribute('aria-expanded', 'false');
+                toggle.focus({ preventScroll: true });
+            }
+        });
+        render();
+        native.hidden = true;
+        selector.querySelector('.role-native-label')?.classList.add('sr-only');
+        enhanced.hidden = false;
+    });
+
     document.querySelectorAll('[data-file-dropzone]').forEach(field => {
         const input = field.querySelector('input[type="file"]');
         const zone = field.querySelector('[data-dropzone]');
@@ -174,6 +252,7 @@
         const requireMixedCase = form.dataset.requireMixedCase !== 'false';
         const requireNumber = form.dataset.requireNumber !== 'false';
         const limitWarning = form.querySelector('[data-password-limit]');
+        const checklist = form.querySelector('[data-password-checklist]');
         const length = value => Array.from(value).length;
         const checks = {
             minimum: value => length(value) >= minimum,
@@ -184,6 +263,9 @@
         };
         const update = () => {
             const value = password.value;
+            if (checklist && form.dataset.passwordOptional === 'true') {
+                checklist.hidden = value.length === 0 && confirmation.value.length === 0;
+            }
             Object.entries(checks).forEach(([key, check]) => {
                 const item = form.querySelector(`[data-rule="${key}"]`);
                 if (!item) return;

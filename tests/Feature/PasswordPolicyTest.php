@@ -76,6 +76,26 @@ class PasswordPolicyTest extends TestCase
         $this->assertSame($originalPassword, $admin->fresh()->password);
     }
 
+    public function test_administrative_user_creation_enforces_confirmation_and_72_character_maximum(): void
+    {
+        $admin = $this->adminUser();
+        $this->actingAsAdmin($admin);
+
+        foreach ([
+            ['Valid-Password-123!', 'Different-Password-123!'],
+            [str_repeat('A', 36).str_repeat('a', 36).'1', str_repeat('A', 36).str_repeat('a', 36).'1'],
+        ] as [$password, $confirmation]) {
+            $this->post(route('admin.users.store'), [
+                'name' => 'Rejected User',
+                'email' => 'rejected-'.strlen($password).'-'.substr(sha1($password.$confirmation), 0, 6).'@example.test',
+                'password' => $password,
+                'password_confirmation' => $confirmation,
+            ])->assertSessionHasErrors('password');
+        }
+
+        $this->assertSame(0, User::query()->where('name', 'Rejected User')->count());
+    }
+
     public function test_profile_renders_dropzone_fallback_and_live_password_requirements(): void
     {
         $user = $this->adminUser(['name' => 'Efraín González']);

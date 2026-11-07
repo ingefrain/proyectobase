@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="page-intro"><p class="muted">Personaliza cómo se identifica esta aplicación en sus interfaces.</p></div>
-    <section class="panel form-panel">
+    <section class="panel form-panel admin-form-surface admin-form-surface-branding">
         <form method="POST" action="{{ route('admin.branding.update') }}" enctype="multipart/form-data" class="stack-form">
             @csrf @method('PUT')
             <div class="field"><label for="visible_name">Nombre visible</label><input id="visible_name" name="visible_name" value="{{ old('visible_name', $branding->visible_name) }}" maxlength="120"><p class="field-hint">Déjalo vacío para usar APP_NAME ({{ config('app.name') }}).</p><x-admin.field-error name="visible_name" /></div>

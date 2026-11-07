@@ -8,7 +8,7 @@
         <a class="button button-secondary" href="{{ route('admin.system-audit.index') }}">Volver a Auditoría del sistema</a>
     </div>
 
-    <section class="metric-grid" aria-label="Métricas de seguridad de acceso">
+    <section class="metric-grid admin-metrics-grid" aria-label="Métricas de seguridad de acceso">
         <article class="metric-card"><span>Accesos exitosos</span><strong>{{ number_format($metrics['successes']) }}</strong><small>Últimas 24 horas</small></article>
         <article class="metric-card"><span>Intentos fallidos</span><strong>{{ number_format($metrics['failures']) }}</strong><small>Últimas 24 horas</small></article>
         <article class="metric-card"><span>Limitados</span><strong>{{ number_format($metrics['rate_limited']) }}</strong><small>Por límite de solicitudes</small></article>
