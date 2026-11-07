@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="page-intro"><p class="muted">Administra tu foto y tus datos personales.</p></div>
-    <div class="profile-grid admin-form-surface-wide">
+    <div class="profile-grid admin-form-surface admin-form-surface-wide">
         <section class="panel form-panel profile-panel">
             <h2>Foto de perfil</h2>
             <div class="avatar-profile-row"><x-admin.user-avatar :user="auth()->user()" size="large" />
@@ -31,7 +31,7 @@
         </section>
     </div>
 
-    <section class="panel profile-security admin-form-surface-wide">
+    <section class="panel profile-security admin-form-surface admin-form-surface-wide">
         <div><h2>Seguridad</h2><p class="muted">Actualiza tu contraseña de acceso cuando lo necesites.</p></div>
         <button class="button button-secondary" type="button" data-modal-open="password-change-dialog">Cambiar contraseña</button>
     </section>
