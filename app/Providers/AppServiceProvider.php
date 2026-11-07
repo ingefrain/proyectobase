@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Contracts\OutboxEmailSender;
 use App\Mail\LaravelOutboxEmailSender;
+use App\Models\Document;
 use App\Models\User;
+use App\Policies\DocumentPolicy;
 use App\Support\BasePermissions;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Gate;
@@ -25,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(Document::class, DocumentPolicy::class);
+
         foreach (array_keys(BasePermissions::DEFINITIONS) as $permission) {
             Gate::define($permission, fn (User $user): bool => $user->hasPermissionTo($permission));
         }

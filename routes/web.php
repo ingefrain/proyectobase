@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\Auth\NewPasswordController;
 use App\Http\Controllers\Admin\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\LoginSecurityController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PermissionController;
@@ -62,5 +63,11 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/notifications', [NotificationController::class, 'index'])->middleware('can:notifications.view')->name('notifications.index');
         Route::get('/notifications/{outboxMessage}', [NotificationController::class, 'show'])->middleware('can:notifications.view')->name('notifications.show');
         Route::post('/notifications/{outboxMessage}/retry', [NotificationController::class, 'retry'])->middleware('can:notifications.retry')->name('notifications.retry');
+
+        Route::get('/documents', [DocumentController::class, 'index'])->middleware('can:documents.view')->name('documents.index');
+        Route::post('/documents', [DocumentController::class, 'store'])->middleware('can:documents.upload')->name('documents.store');
+        Route::get('/documents/{document:uuid}/download', [DocumentController::class, 'download'])->middleware('can:documents.download')->name('documents.download');
+        Route::put('/documents/{document:uuid}', [DocumentController::class, 'update'])->middleware('can:documents.update')->name('documents.update');
+        Route::delete('/documents/{document:uuid}', [DocumentController::class, 'destroy'])->middleware('can:documents.delete')->name('documents.destroy');
     });
 });

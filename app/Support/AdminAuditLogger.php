@@ -18,9 +18,10 @@ class AdminAuditLogger
         ?array $before = null,
         ?array $after = null,
         ?array $context = null,
+        ?int $actorId = null,
     ): AdminAuditEvent {
         return AdminAuditEvent::query()->create([
-            'actor_id' => auth()->id(),
+            'actor_id' => $actorId ?? auth()->id(),
             'action' => $action,
             'entity_type' => $entityType,
             'entity_id' => $entityId === null ? null : (string) $entityId,

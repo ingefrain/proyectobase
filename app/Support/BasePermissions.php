@@ -22,6 +22,11 @@ class BasePermissions
         'security.login.view' => 'Consultar intentos y seguridad de acceso',
         'notifications.view' => 'Consultar mensajes transaccionales y sus intentos',
         'notifications.retry' => 'Reintentar mensajes transaccionales fallidos',
+        'documents.view' => 'Consultar metadata de documentos permitidos',
+        'documents.upload' => 'Subir documentos',
+        'documents.download' => 'Descargar documentos autorizados',
+        'documents.update' => 'Actualizar metadata y reemplazar documentos',
+        'documents.delete' => 'Marcar documentos para eliminación',
         'notifications.view' => 'Consultar mensajes transaccionales y sus intentos',
         'notifications.retry' => 'Reintentar mensajes transaccionales fallidos',
     ];
@@ -32,5 +37,6 @@ class BasePermissions
         'roles.view', 'roles.create', 'roles.update', 'roles.assign',
         'permissions.view', 'permissions.assign',
         'notifications.view', 'notifications.retry',
+        'documents.view', 'documents.upload', 'documents.download', 'documents.update', 'documents.delete',
     ];
 }
