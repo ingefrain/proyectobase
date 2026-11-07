@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\Auth\NewPasswordController;
 use App\Http\Controllers\Admin\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\LoginSecurityController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProfileController;
@@ -20,7 +21,8 @@ Route::get('/', fn () => redirect()->route('admin.login'));
 Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::middleware('guest')->group(function (): void {
         Route::get('/login', [LoginController::class, 'create'])->name('login');
-        Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:admin-login')->name('login.store');
+        Route::post('/login', [LoginController::class, 'store'])
+            ->middleware('throttle:admin-login')->name('login.store');
         Route::get('/password/forgot', [PasswordResetLinkController::class, 'create'])->name('password.request');
         Route::post('/password/forgot', [PasswordResetLinkController::class, 'store'])->middleware('throttle:admin-password')->name('password.email');
         Route::get('/password/reset/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
@@ -32,6 +34,8 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/settings', SettingsController::class)->name('settings.index');
         Route::get('/system-audit', SystemAuditController::class)->middleware('can:system.audit.view')->name('system-audit.index');
         Route::get('/system-status', SystemStatusController::class)->middleware('can:system.audit.view')->name('system-status.index');
+        Route::get('/system-audit/login-security', LoginSecurityController::class)
+            ->middleware('can:security.login.view')->name('login-security.index');
         Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -9,3 +9,6 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('outbox:process --limit=100')->everyMinute()->withoutOverlapping(1);
+if (config('security.login_attempt_schedule_prune', true)) {
+    Schedule::command('security:prune-login-attempts')->daily()->withoutOverlapping();
+}

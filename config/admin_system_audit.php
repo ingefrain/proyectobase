@@ -3,6 +3,13 @@
 return [
     'cards' => [
         [
+            'title' => 'Seguridad de acceso',
+            'description' => 'Consulta inicios de sesión, intentos fallidos y bloqueos recientes.',
+            'action' => 'Consultar seguridad de acceso',
+            'route' => 'admin.login-security.index',
+            'permission' => 'security.login.view',
+        ],
+        [
             'title' => 'Actividad administrativa',
             'description' => 'Consulta quién realizó cambios administrativos y qué modificó.',
             'action' => 'Consultar actividad administrativa',

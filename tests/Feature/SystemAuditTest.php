@@ -41,6 +41,7 @@ class SystemAuditTest extends TestCase
         $this->actingAsAdmin($administrator)->get(route('admin.system-audit.index'))
             ->assertOk()
             ->assertSee('Actividad administrativa')
+            ->assertSee('Seguridad de acceso')
             ->assertSee('Permisos del sistema')
             ->assertSee('Entregas')
             ->assertSee('Estado del sistema');
@@ -53,6 +54,7 @@ class SystemAuditTest extends TestCase
             ->assertOk()
             ->assertSee('Permisos del sistema')
             ->assertSee('Estado del sistema')
+            ->assertDontSee('Seguridad de acceso')
             ->assertDontSee('Actividad administrativa')
             ->assertDontSee('Entregas');
 
@@ -113,9 +115,11 @@ class SystemAuditTest extends TestCase
             ->assertDontSee('APP_KEY')
             ->assertDontSee('DB_PASSWORD')
             ->assertDontSee('MAIL_PASSWORD')
+            ->assertSee('Modo mantenimiento')
             ->assertDontSee('private payload')
             ->assertViewHas('indicators', fn (array $indicators): bool => $indicators['Mensajes outbox pendientes'] === 1
-                && $indicators['Mensajes outbox fallidos'] === 1);
+                && $indicators['Mensajes outbox fallidos'] === 1
+                && $indicators['Modo mantenimiento'] === 'Inactivo');
     }
 
     private function outboxMessage(string $status): void

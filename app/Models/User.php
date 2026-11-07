@@ -24,6 +24,7 @@ class User extends Authenticatable
             'is_active' => 'boolean',
             'session_version' => 'integer',
             'last_activity_at' => 'datetime',
+            'last_login_at' => 'datetime',
         ];
     }
 

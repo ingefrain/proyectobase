@@ -33,6 +33,11 @@ class SystemStatusController extends Controller
 
         $queue = config('queue.default');
         $cache = config('cache.default');
+        try {
+            $maintenanceMode = app()->isDownForMaintenance() ? 'Activo' : 'Inactivo';
+        } catch (Throwable) {
+            $maintenanceMode = $unavailable;
+        }
 
         $indicators = [
             'Entorno' => app()->environment() ?: $unavailable,
@@ -43,6 +48,7 @@ class SystemStatusController extends Controller
             'Driver de colas' => config("queue.connections.{$queue}.driver") ?: $unavailable,
             'Driver de caché' => config("cache.stores.{$cache}.driver") ?: $unavailable,
             'Mailer configurado' => config('mail.default') ?: $unavailable,
+            'Modo mantenimiento' => $maintenanceMode,
             'Mensajes outbox pendientes' => $outboxPending,
             'Mensajes outbox fallidos' => $outboxFailed,
             'Última ejecución del scheduler' => $unavailable,

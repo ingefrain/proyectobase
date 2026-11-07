@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\LoginAttempt;
+use App\Models\User;
+use App\Services\LoginAttemptRecorder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +25,7 @@ class LoginController extends Controller
         return redirect()->route($route);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, LoginAttemptRecorder $recorder): RedirectResponse
     {
         $credentials = $request->validate([
             'email' => ['required', 'email', 'max:255'],
@@ -33,9 +36,23 @@ class LoginController extends Controller
         $remember = $request->boolean('remember');
         unset($credentials['remember']);
 
+        $attemptedUser = User::query()->select(['id', 'email', 'is_active'])->where('email', $credentials['email'])->first();
+
         if (! Auth::attempt([...$credentials, 'is_active' => true], $remember)) {
+            $inactive = $attemptedUser !== null && ! $attemptedUser->is_active;
+            $recorder->record(
+                $request,
+                $inactive ? LoginAttempt::INACTIVE_ACCOUNT : LoginAttempt::INVALID_CREDENTIALS,
+                $inactive ? 'account_inactive' : 'credentials_rejected',
+                $attemptedUser,
+            );
+
             throw ValidationException::withMessages(['email' => 'El correo o la contraseña no son correctos.']);
         }
+
+        $user = $request->user();
+        $user->forceFill(['last_login_at' => now(), 'last_login_ip' => $request->ip()])->save();
+        $recorder->record($request, LoginAttempt::SUCCESS, 'authenticated', $user);
 
         $request->session()->regenerate();
         $request->session()->put('auth_session_version', $request->user()->session_version);

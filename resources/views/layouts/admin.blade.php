@@ -22,7 +22,7 @@
                     <a class="side-link {{ request()->routeIs('admin.dashboard') ? 'is-active' : '' }}" href="{{ route('admin.dashboard') }}" @if(request()->routeIs('admin.dashboard')) aria-current="page" @endif>Resumen</a>
                 @endcan
                 @canany(['users.view', 'roles.view', 'notifications.view', 'system.audit.view'])
-                    <a class="side-link {{ request()->routeIs('admin.settings.*', 'admin.users.*', 'admin.roles.*', 'admin.system-audit.*', 'admin.system-status.*', 'admin.permissions.*', 'admin.audit.*', 'admin.notifications.*') ? 'is-active' : '' }}" href="{{ route('admin.settings.index') }}" @if(request()->routeIs('admin.settings.*', 'admin.users.*', 'admin.roles.*', 'admin.system-audit.*', 'admin.system-status.*', 'admin.permissions.*', 'admin.audit.*', 'admin.notifications.*')) aria-current="page" @endif>Configuración</a>
+                    <a class="side-link {{ request()->routeIs('admin.settings.*', 'admin.users.*', 'admin.roles.*', 'admin.system-audit.*', 'admin.system-status.*', 'admin.login-security.*', 'admin.permissions.*', 'admin.audit.*', 'admin.notifications.*') ? 'is-active' : '' }}" href="{{ route('admin.settings.index') }}" @if(request()->routeIs('admin.settings.*', 'admin.users.*', 'admin.roles.*', 'admin.system-audit.*', 'admin.system-status.*', 'admin.login-security.*', 'admin.permissions.*', 'admin.audit.*', 'admin.notifications.*')) aria-current="page" @endif>Configuración</a>
                 @endcanany
             </nav>
         </aside>

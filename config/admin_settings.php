@@ -25,7 +25,7 @@ return [
         ],
         [
             'title' => 'Auditoría del sistema',
-            'description' => 'Herramientas técnicas para revisar actividad, permisos, entregas y estado de la aplicación.',
+            'description' => 'Herramientas técnicas para revisar seguridad de acceso, actividad, permisos, entregas y estado de la aplicación.',
             'action' => 'Abrir auditoría del sistema',
             'route' => 'admin.system-audit.index',
             'permission' => 'system.audit.view',
