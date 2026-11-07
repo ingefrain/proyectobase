@@ -22,4 +22,45 @@ return [
         'asp', 'aspx', 'jsp', 'cgi', 'pl', 'py', 'rb', 'conf', 'config',
         'htaccess', 'htpasswd', 'env', 'ini', 'dll', 'so', 'dylib',
     ],
+    'category_rules' => [
+        'user.avatar' => [
+            'max_size_kb' => (int) env('USER_AVATAR_MAX_SIZE_KB', 5120),
+            'allowed_mime_types' => [
+                'image/jpeg' => ['jpg', 'jpeg'],
+                'image/png' => ['png'],
+                'image/webp' => ['webp'],
+            ],
+        ],
+        'branding.logo' => [
+            'max_size_kb' => (int) env('BRANDING_LOGO_MAX_SIZE_KB', 5120),
+            'allowed_mime_types' => [
+                'image/jpeg' => ['jpg', 'jpeg'],
+                'image/png' => ['png'],
+                'image/webp' => ['webp'],
+            ],
+        ],
+    ],
+    'category_labels' => [
+        'user.avatar' => 'Foto de perfil',
+        'branding.logo' => 'Logotipo del sistema',
+    ],
+    'image_max_input_pixels' => (int) env('DOCUMENTS_IMAGE_MAX_INPUT_PIXELS', 16000000),
+    'image_processing' => [
+        'user.avatar' => [
+            'enabled' => true,
+            'format' => 'webp',
+            'quality' => (int) env('USER_AVATAR_WEBP_QUALITY', 82),
+            'max_width' => (int) env('USER_AVATAR_MAX_WIDTH', 1024),
+            'max_height' => (int) env('USER_AVATAR_MAX_HEIGHT', 1024),
+            'on_unsupported' => 'error',
+        ],
+        'branding.logo' => [
+            'enabled' => true,
+            'format' => 'webp',
+            'quality' => (int) env('BRANDING_LOGO_WEBP_QUALITY', 85),
+            'max_width' => (int) env('BRANDING_LOGO_MAX_WIDTH', 1600),
+            'max_height' => (int) env('BRANDING_LOGO_MAX_HEIGHT', 1600),
+            'on_unsupported' => 'error',
+        ],
+    ],
 ];

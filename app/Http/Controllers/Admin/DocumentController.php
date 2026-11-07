@@ -49,6 +49,16 @@ class DocumentController extends Controller
         $categories = $ownerAccess->scopeVisibleTo(Document::query(), $request->user())
             ->select('category')->distinct()->orderBy('category')->pluck('category');
 
+        $labels = (array) config('documents.category_labels', []);
+        $documents->getCollection()->each(function (Document $document) use ($labels): void {
+            $document->setAttribute('category_label', $labels[$document->category] ?? $document->category);
+        });
+
+        $categories = $categories->map(fn (string $category): array => [
+            'key' => $category,
+            'label' => $labels[$category] ?? $category,
+        ]);
+
         return view('admin.documents.index', compact('documents', 'filters', 'categories'));
     }
 

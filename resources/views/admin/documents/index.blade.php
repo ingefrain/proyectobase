@@ -23,7 +23,7 @@
     <section class="panel">
         <form method="GET" action="{{ route('admin.documents.index') }}" class="filter-bar" aria-label="Filtrar documentos">
             <label class="filter-search" for="q">Buscar<input id="q" name="q" type="search" value="{{ $filters['q'] ?? '' }}" maxlength="180" placeholder="Nombre, título o categoría"></label>
-            <label for="category">Categoría<select id="category" name="category"><option value="">Todas</option>@foreach($categories as $category)<option value="{{ $category }}" @selected(($filters['category'] ?? '') === $category)>{{ $category }}</option>@endforeach</select></label>
+            <label for="category">Categoría<select id="category" name="category"><option value="">Todas</option>@foreach($categories as $category)<option value="{{ $category['key'] }}" @selected(($filters['category'] ?? '') === $category['key'])>{{ $category['label'] }}</option>@endforeach</select></label>
             <label for="type">Tipo<select id="type" name="type"><option value="">Todos</option><option value="image" @selected(($filters['type'] ?? '') === 'image')>Imagen</option><option value="pdf" @selected(($filters['type'] ?? '') === 'pdf')>PDF</option><option value="text" @selected(($filters['type'] ?? '') === 'text')>Texto</option><option value="other" @selected(($filters['type'] ?? '') === 'other')>Otro</option></select></label>
             <label for="date-from">Desde<input id="date-from" name="date_from" type="date" value="{{ $filters['date_from'] ?? '' }}"></label>
             <label for="date-to">Hasta<input id="date-to" name="date_to" type="date" value="{{ $filters['date_to'] ?? '' }}"></label>
@@ -39,7 +39,7 @@
                 @foreach($documents as $document)
                     <tr>
                         <td><strong>{{ $document->title ?: $document->safeOriginalName() }}</strong><span class="user-email">{{ $document->safeOriginalName() }}</span></td>
-                        <td>{{ $document->category }}</td>
+                        <td>{{ $document->category_label }}</td>
                         <td><span>{{ $document->mime_type }}</span><span class="user-email">{{ $document->humanSize() }}</span></td>
                         <td>{{ $document->entity_label }}</td>
                         <td>{{ $document->uploader?->name ?? 'Cuenta eliminada' }}</td>

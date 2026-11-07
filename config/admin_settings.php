@@ -31,6 +31,13 @@ return [
             'permission' => 'documents.view',
         ],
         [
+            'title' => 'Identidad visual',
+            'description' => 'Configura el nombre y logotipo mostrados por la aplicación.',
+            'action' => 'Personalizar identidad visual',
+            'route' => 'admin.branding.edit',
+            'permission' => 'branding.manage',
+        ],
+        [
             'title' => 'Auditoría del sistema',
             'description' => 'Herramientas técnicas para revisar seguridad de acceso, actividad, permisos, entregas y estado de la aplicación.',
             'action' => 'Abrir auditoría del sistema',

@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\Documents\DocumentService;
 use App\Support\AdminAuditLogger;
+use App\Support\PasswordPolicy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -17,6 +18,29 @@ class ProfileController extends Controller
     public function edit(): View
     {
         return view('admin.profile');
+    }
+
+    public function updateAvatar(Request $request, DocumentService $documents): RedirectResponse
+    {
+        $request->validate(['file' => ['required', 'file']]);
+        $user = $request->user();
+        $avatar = $user->avatar;
+        if ($avatar) {
+            $documents->update($avatar, [], $user, $request->file('file'));
+        } else {
+            $documents->upload($request->file('file'), $user, $user, 'user.avatar', ['title' => 'Foto de perfil']);
+        }
+
+        return back()->with('status', 'Foto de perfil actualizada.');
+    }
+
+    public function deleteAvatar(Request $request, DocumentService $documents): RedirectResponse
+    {
+        $avatar = $request->user()->avatar;
+        abort_unless($avatar, 404);
+        $documents->delete($avatar, $request->user());
+
+        return back()->with('status', 'Foto de perfil eliminada.');
     }
 
     public function update(Request $request, AdminAuditLogger $audit): RedirectResponse
@@ -35,8 +59,7 @@ class ProfileController extends Controller
     public function updatePassword(Request $request, AdminAuditLogger $audit): RedirectResponse
     {
         $validated = $request->validate([
-            'current_password' => ['required', 'current_password'],
-            'password' => ['required', 'confirmed', Password::min(12)],
+            'password' => PasswordPolicy::rules(),
         ]);
         $user = $request->user();
         $currentSessionId = $request->session()->getId();

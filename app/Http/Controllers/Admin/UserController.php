@@ -8,12 +8,12 @@ use App\Models\User;
 use App\Support\AdminAuditLogger;
 use App\Support\AdministrativeAccess;
 use App\Support\AdministrativeState;
+use App\Support\PasswordPolicy;
 use App\Support\SessionInvalidator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 class UserController extends Controller
@@ -26,7 +26,7 @@ class UserController extends Controller
             'role' => ['nullable', 'integer', 'exists:roles,id'],
         ]);
 
-        $users = User::query()->with('roles')->when($filters['q'] ?? null, function ($query, string $search): void {
+        $users = User::query()->with(['roles', 'avatar'])->when($filters['q'] ?? null, function ($query, string $search): void {
             $query->where(fn ($query) => $query
                 ->where('name', 'like', '%'.$search.'%')
                 ->orWhere('email', 'like', '%'.$search.'%'));
@@ -66,7 +66,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'confirmed', Password::min(12)],
+            'password' => PasswordPolicy::rules(),
             'role_ids' => ['sometimes', 'array'],
             'role_ids.*' => ['integer', 'distinct', 'exists:roles,id'],
         ]);
@@ -119,7 +119,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
-            'password' => ['nullable', 'confirmed', Password::min(12)],
+            'password' => PasswordPolicy::rules('nullable'),
             'role_ids' => ['sometimes', 'array'],
             'role_ids.*' => ['integer', 'distinct', 'exists:roles,id'],
         ]);

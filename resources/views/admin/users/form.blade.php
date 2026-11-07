@@ -13,7 +13,7 @@
                 <div class="field"><label for="email">Correo electrónico</label><input id="email" name="email" type="email" value="{{ old('email', $user->email) }}" maxlength="255" autocomplete="email" required><x-admin.field-error name="email" /></div>
             </div>
             <div class="field-grid">
-                <div class="field"><label for="password">{{ $creating ? 'Contraseña' : 'Nueva contraseña (opcional)' }}</label><input id="password" name="password" type="password" autocomplete="new-password" @required($creating)><p class="field-hint">Mínimo 12 caracteres. Déjalo vacío si no quieres cambiarla.</p><x-admin.field-error name="password" /></div>
+                <div class="field"><label for="password">{{ $creating ? 'Contraseña' : 'Nueva contraseña (opcional)' }}</label><input id="password" name="password" type="password" autocomplete="new-password" @required($creating)><p class="field-hint">{{ \App\Support\PasswordPolicy::summary() }} Déjalo vacío si no quieres cambiarla.</p><x-admin.field-error name="password" /></div>
                 <div class="field"><label for="password_confirmation">Confirmar contraseña</label><input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" @required($creating)></div>
             </div>
             @can('roles.assign')

@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\Auth\NewPasswordController;
 use App\Http\Controllers\Admin\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Admin\AvatarController;
+use App\Http\Controllers\Admin\BrandingController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\LoginSecurityController;
@@ -18,6 +20,7 @@ use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route('admin.login'));
+Route::get('/branding/logo', [BrandingController::class, 'logo'])->name('branding.logo');
 
 Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::middleware('guest')->group(function (): void {
@@ -41,6 +44,14 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+        Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
+        Route::delete('/profile/avatar', [ProfileController::class, 'deleteAvatar'])->name('profile.avatar.delete');
+        Route::get('/profile/avatar', [AvatarController::class, 'own'])->name('profile.avatar');
+
+        Route::get('/branding', [BrandingController::class, 'edit'])->middleware('can:branding.manage')->name('branding.edit');
+        Route::put('/branding', [BrandingController::class, 'update'])->middleware('can:branding.manage')->name('branding.update');
+        Route::delete('/branding/logo', [BrandingController::class, 'destroyLogo'])->middleware('can:branding.manage')->name('branding.logo.delete');
+        Route::get('/users/{user}/avatar', [AvatarController::class, 'user'])->middleware('can:users.view')->name('users.avatar');
 
         Route::get('/users', [UserController::class, 'index'])->middleware('can:users.view')->name('users.index');
         Route::get('/users/create', [UserController::class, 'create'])->middleware('can:users.create')->name('users.create');

@@ -27,6 +27,7 @@ class BasePermissions
         'documents.download' => 'Descargar documentos autorizados',
         'documents.update' => 'Actualizar metadata y reemplazar documentos',
         'documents.delete' => 'Marcar documentos para eliminación',
+        'branding.manage' => 'Administrar nombre y logotipo de la aplicación',
         'notifications.view' => 'Consultar mensajes transaccionales y sus intentos',
         'notifications.retry' => 'Reintentar mensajes transaccionales fallidos',
     ];
@@ -38,5 +39,6 @@ class BasePermissions
         'permissions.view', 'permissions.assign',
         'notifications.view', 'notifications.retry',
         'documents.view', 'documents.upload', 'documents.download', 'documents.update', 'documents.delete',
+        'branding.manage',
     ];
 }

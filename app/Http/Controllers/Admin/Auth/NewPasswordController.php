@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\AdminAuditLogger;
+use App\Support\PasswordPolicy;
 use App\Support\SessionInvalidator;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
@@ -13,7 +14,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\Validation\ValidationException;
 
 class NewPasswordController extends Controller
@@ -36,7 +36,7 @@ class NewPasswordController extends Controller
         $validated = $request->validate([
             'token' => ['required', 'string'],
             'email' => ['required', 'email', 'max:255'],
-            'password' => ['required', 'confirmed', PasswordRule::min(12)],
+            'password' => PasswordPolicy::rules(),
         ]);
         $validated['email'] = mb_strtolower(trim($validated['email']));
 

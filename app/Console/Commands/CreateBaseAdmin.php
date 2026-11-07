@@ -7,10 +7,10 @@ use App\Models\Role;
 use App\Models\User;
 use App\Support\AdminAuditLogger;
 use App\Support\BasePermissions;
+use App\Support\PasswordPolicy;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 
 class CreateBaseAdmin extends Command
@@ -37,7 +37,7 @@ class CreateBaseAdmin extends Command
         } else {
             $name = trim((string) $this->ask('Nombre'));
             $email = mb_strtolower(trim((string) $this->ask('Correo')));
-            $password = (string) $this->secret('Contraseña (mínimo 12 caracteres)');
+            $password = (string) $this->secret('Contraseña (mínimo '.PasswordPolicy::minimumLength().' caracteres)');
             $confirmation = (string) $this->secret('Confirma la contraseña');
         }
 
@@ -46,7 +46,7 @@ class CreateBaseAdmin extends Command
             [
                 'name' => ['required', 'string', 'max:120'],
                 'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-                'password' => ['required', 'confirmed', Password::min(12)],
+                'password' => PasswordPolicy::rules(),
             ],
         );
         if ($validator->fails()) {

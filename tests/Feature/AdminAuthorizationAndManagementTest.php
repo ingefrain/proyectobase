@@ -317,7 +317,6 @@ class AdminAuthorizationAndManagementTest extends TestCase
         ]);
 
         $this->actingAsAdmin($admin)->put(route('admin.profile.password'), [
-            'current_password' => 'Clave-anterior-segura-123!',
             'password' => 'Clave-nueva-segura-456!',
             'password_confirmation' => 'Clave-nueva-segura-456!',
         ])->assertRedirect();

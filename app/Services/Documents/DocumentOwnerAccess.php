@@ -2,6 +2,7 @@
 
 namespace App\Services\Documents;
 
+use App\Models\ApplicationBranding;
 use App\Models\Document;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,6 +25,9 @@ class DocumentOwnerAccess
         if ($owner instanceof User) {
             return $actor->is($owner);
         }
+        if ($owner instanceof ApplicationBranding) {
+            return $actor->can('branding.manage') && (string) $owner->getKey() === '1';
+        }
 
         $gate = Gate::forUser($actor);
 
@@ -37,6 +41,12 @@ class DocumentOwnerAccess
                 $users->where('documentable_type', (new User)->getMorphClass())
                     ->where('documentable_id', (string) $actor->getKey());
             });
+            if ($actor->can('branding.manage')) {
+                $builder->orWhere(function (Builder $branding): void {
+                    $branding->where('documentable_type', (new ApplicationBranding)->getMorphClass())
+                        ->where('documentable_id', '1');
+                });
+            }
         });
     }
 

@@ -40,7 +40,7 @@
                             </span>
                             <span class="sr-only">{{ $user->last_activity_at ? 'Última actividad '.$user->last_activity_at->format('d/m/Y H:i') : 'Sin actividad registrada' }}</span>
                         </td>
-                        <td data-label="Usuario"><strong>{{ $user->name }}</strong><span class="user-email">{{ $user->email }}</span></td>
+                        <td data-label="Usuario"><div class="user-cell"><x-admin.user-avatar :user="$user" size="small" /><div><strong>{{ $user->name }}</strong><span class="user-email">{{ $user->email }}</span></div></div></td>
                         <td data-label="Rol"><div class="badge-list">@forelse($user->roles as $role)<span class="badge badge-neutral">{{ $role->name }}</span>@empty<span class="muted">Sin rol</span>@endforelse</div></td>
                         <td data-label="Estado"><span class="badge {{ $user->is_active ? 'badge-success' : 'badge-muted' }}">{{ $user->is_active ? 'Activo' : 'Inactivo' }}</span></td>
                         <td class="row-actions" data-label="Acciones">

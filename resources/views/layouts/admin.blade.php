@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Resumen') · Proyecto Base</title>
+    @php($branding = \App\Models\ApplicationBranding::current())
+    <title>@yield('title', 'Resumen') · {{ $branding->displayName() }}</title>
     <link rel="stylesheet" href="{{ asset('assets/base-admin/admin.css') }}?v={{ filemtime(public_path('assets/base-admin/admin.css')) }}">
 </head>
 <body class="admin-body">
@@ -14,8 +15,8 @@
         <button class="drawer-scrim" type="button" data-drawer-close aria-label="Cerrar menú" tabindex="-1"></button>
         <aside class="sidebar" id="admin-sidebar" aria-label="Navegación administrativa">
             <a class="brand" href="{{ auth()->user()->can('dashboard.view') ? route('admin.dashboard') : route('admin.settings.index') }}">
-                <span class="brand-mark" aria-hidden="true">PB</span>
-                <span><strong>Proyecto Base</strong><small>Administración</small></span>
+                @if($branding->logo)<img class="brand-logo" src="{{ route('branding.logo') }}?v={{ substr($branding->logo->checksum, 0, 16) }}" alt="">@else<span class="brand-mark" aria-hidden="true">PB</span>@endif
+                <span><strong>{{ $branding->displayName() }}</strong><small>Administración</small></span>
             </a>
             <nav class="side-navigation" aria-label="Principal">
                 @can('dashboard.view')
@@ -32,13 +33,13 @@
                 <div class="topbar-start">
                     <button class="menu-toggle" type="button" data-menu-toggle aria-label="Abrir menú de navegación" aria-controls="admin-sidebar" aria-expanded="false">☰</button>
                     <div class="page-heading">
-                        <p class="eyebrow">Proyecto Base · Administración</p>
+                        <p class="eyebrow">{{ $branding->displayName() }} · Administración</p>
                         <h1>@yield('title', 'Resumen')</h1>
                     </div>
                 </div>
                 <details class="profile-menu">
                     <summary aria-label="Abrir menú de perfil">
-                        <span class="avatar" aria-hidden="true">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
+                <x-admin.user-avatar :user="auth()->user()" size="small" />
                         <span class="profile-menu-name">{{ auth()->user()->name }}</span>
                         <span aria-hidden="true">⌄</span>
                     </summary>
@@ -66,9 +67,9 @@
                 @endif
                 @yield('content')
             </main>
-            <footer class="workspace-footer"><span>Proyecto Base</span><span>Administración reutilizable</span></footer>
+            <footer class="workspace-footer"><span>{{ $branding->displayName() }}</span><span>Administración reutilizable</span></footer>
         </div>
     </div>
-    <script src="{{ asset('assets/base-admin/admin.js') }}" defer></script>
+    <script src="{{ asset('assets/base-admin/admin.js') }}?v={{ filemtime(public_path('assets/base-admin/admin.js')) }}" defer></script>
 </body>
 </html>

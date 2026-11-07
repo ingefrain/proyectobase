@@ -18,6 +18,7 @@ class DocumentService
     public function __construct(
         private readonly AdminAuditLogger $audit,
         private readonly ManagedDocumentPath $managedPath,
+        private readonly DocumentImageProcessor $imageProcessor,
     ) {}
 
     /** @param array<string, mixed> $attributes @param array<string, mixed>|null $metadata */
@@ -29,14 +30,15 @@ class DocumentService
         array $attributes = [],
         ?array $metadata = null,
     ): Document {
-        $prepared = $this->prepareFile($file);
-        $this->validateMetadata($metadata);
         $category = $this->validateCategory($category);
+        $prepared = $this->prepareFile($file, $category);
+        $metadata = array_merge($metadata ?? [], $prepared['processing_metadata'] ?? []);
+        $this->validateMetadata($metadata);
         $disk = $this->privateDisk();
         $uuid = (string) Str::uuid();
         $storedName = $uuid.'.'.$prepared['extension'];
         $path = trim((string) config('documents.directory', 'documents'), '/').'/'.$storedName;
-        $this->storeOrFail($disk, $path, $file);
+        $this->storeOrFail($disk, $path, $file, $prepared['contents'] ?? null);
 
         try {
             return DB::transaction(function () use ($prepared, $documentable, $uploader, $category, $attributes, $metadata, $disk, $path, $storedName, $uuid): Document {
@@ -88,7 +90,11 @@ class DocumentService
             ? $this->optionalString($attributes['description'], 4000, 'description')
             : $document->description;
         $this->validateMetadata($metadata);
-        $prepared = $replacement ? $this->prepareFile($replacement) : null;
+        $prepared = $replacement ? $this->prepareFile($replacement, $category) : null;
+        if ($prepared !== null && isset($prepared['processing_metadata'])) {
+            $metadata = array_merge(is_array($document->metadata) ? $document->metadata : [], $metadata ?? [], $prepared['processing_metadata']);
+            $this->validateMetadata($metadata);
+        }
         $newPath = null;
         $newName = null;
 
@@ -99,7 +105,7 @@ class DocumentService
             }
             $newName = Str::uuid().'.'.$prepared['extension'];
             $newPath = trim((string) config('documents.directory', 'documents'), '/').'/'.$newName;
-            $this->storeOrFail($document->disk, $newPath, $replacement);
+            $this->storeOrFail($document->disk, $newPath, $replacement, $prepared['contents'] ?? null);
         }
 
         $oldDisk = $document->disk;
@@ -135,7 +141,7 @@ class DocumentService
                         ['category', 'title', 'description'],
                         fn (string $key): bool => $beforeFields[$key] !== $document->{$key},
                     ))],
-                    ['file_replaced' => $prepared !== null],
+                    ['file_replaced' => $prepared !== null, 'category' => $category],
                     actorId: $actor->id,
                 );
 
@@ -166,22 +172,27 @@ class DocumentService
         });
     }
 
-    /** @return array{original_name: string, mime_type: string, extension: string, size_bytes: int, checksum: string} */
-    private function prepareFile(UploadedFile $file): array
+    /** @return array{original_name: string, mime_type: string, extension: string, size_bytes: int, checksum: string, contents?: string, processing_metadata?: array<string, int|string|bool>} */
+    private function prepareFile(UploadedFile $file, string $category): array
     {
         if (! $file->isValid() || $file->getError() !== UPLOAD_ERR_OK) {
             throw ValidationException::withMessages(['file' => 'No se pudo recibir el archivo. Intenta subirlo nuevamente.']);
         }
 
         $size = $file->getSize();
-        $maximum = max(1, (int) config('documents.max_size_kb', 10240)) * 1024;
+        $categoryRules = (array) config('documents.category_rules', []);
+        $rules = is_array($categoryRules[$category] ?? null) ? $categoryRules[$category] : [];
+        $maximum = max(1, (int) ($rules['max_size_kb'] ?? config('documents.max_size_kb', 10240))) * 1024;
         if (! is_int($size) || $size <= 0 || $size > $maximum) {
             throw ValidationException::withMessages(['file' => 'El archivo está vacío o supera el tamaño máximo permitido.']);
         }
 
         $original = $this->safeIncomingName($file->getClientOriginalName());
         $extension = strtolower(pathinfo($original, PATHINFO_EXTENSION));
-        $blocked = array_map('strtolower', (array) config('documents.blocked_extensions', []));
+        $blocked = array_map('strtolower', array_merge(
+            (array) config('documents.blocked_extensions', []),
+            (array) ($rules['blocked_extensions'] ?? []),
+        ));
         if ($extension === '' || in_array($extension, $blocked, true)) {
             throw ValidationException::withMessages(['file' => 'La extensión del archivo no está permitida.']);
         }
@@ -196,23 +207,44 @@ class DocumentService
             throw ValidationException::withMessages(['file' => 'No se pudo detectar el tipo del archivo.']);
         }
         $mime = strtolower($detectedMime);
-        $allowed = (array) config('documents.allowed_mime_types', []);
+        $allowed = (array) ($rules['allowed_mime_types'] ?? config('documents.allowed_mime_types', []));
         if (! isset($allowed[$mime]) || ! in_array($extension, array_map('strtolower', (array) $allowed[$mime]), true)) {
             throw ValidationException::withMessages(['file' => 'El tipo MIME y la extensión del archivo no están permitidos.']);
         }
 
-        $checksum = hash_file('sha256', $realPath);
+        $processed = $this->imageProcessor->process($file, $category, $mime);
+        if ($processed !== null) {
+            $mime = $processed['mime_type'];
+            $extension = $processed['extension'];
+            $size = strlen($processed['contents']);
+            $checksum = hash('sha256', $processed['contents']);
+            $processingMetadata = [
+                'source_mime' => strtolower($detectedMime),
+                'optimized' => true,
+                'width' => $processed['width'],
+                'height' => $processed['height'],
+            ];
+        } else {
+            $checksum = hash_file('sha256', $realPath);
+            $processingMetadata = null;
+        }
         if (! is_string($checksum)) {
             throw ValidationException::withMessages(['file' => 'No se pudo verificar la integridad del archivo.']);
         }
 
-        return [
+        $prepared = [
             'original_name' => $original,
             'mime_type' => $mime,
             'extension' => $extension,
             'size_bytes' => $size,
             'checksum' => $checksum,
         ];
+        if ($processed !== null) {
+            $prepared['contents'] = $processed['contents'];
+            $prepared['processing_metadata'] = $processingMetadata;
+        }
+
+        return $prepared;
     }
 
     private function safeIncomingName(string $name): string
@@ -315,10 +347,13 @@ class DocumentService
         return $disk;
     }
 
-    private function storeOrFail(string $disk, string $path, UploadedFile $file): void
+    private function storeOrFail(string $disk, string $path, UploadedFile $file, ?string $contents = null): void
     {
         try {
-            if (! Storage::disk($disk)->putFileAs(dirname($path), $file, basename($path), ['visibility' => 'private'])) {
+            $stored = $contents === null
+                ? Storage::disk($disk)->putFileAs(dirname($path), $file, basename($path), ['visibility' => 'private'])
+                : Storage::disk($disk)->put($path, $contents, ['visibility' => 'private']);
+            if (! $stored) {
                 $this->deleteStoredFile($disk, $path);
                 throw ValidationException::withMessages(['file' => 'No se pudo almacenar el archivo.']);
             }

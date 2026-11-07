@@ -13,7 +13,7 @@
         <x-admin.field-error name="email" />
         <label for="password">Nueva contraseña</label>
         <input id="password" name="password" type="password" autocomplete="new-password" required>
-        <p class="field-hint">Usa al menos 12 caracteres.</p>
+        <p class="field-hint">{{ \App\Support\PasswordPolicy::summary() }}</p>
         <x-admin.field-error name="password" />
         <label for="password_confirmation">Confirma la contraseña</label>
         <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" required>
