@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\Documents\DocumentService;
 use App\Support\AdminAuditLogger;
+use App\Support\ImpersonationManager;
 use App\Support\PasswordPolicy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,15 +21,16 @@ class ProfileController extends Controller
         return view('admin.profile');
     }
 
-    public function updateAvatar(Request $request, DocumentService $documents): RedirectResponse
+    public function updateAvatar(Request $request, DocumentService $documents, ImpersonationManager $impersonation): RedirectResponse
     {
         $request->validate(['file' => ['required', 'file']]);
         $user = $request->user();
+        $uploader = $impersonation->actor() ?? $user;
         $avatar = $user->avatar;
         if ($avatar) {
-            $documents->update($avatar, [], $user, $request->file('file'));
+            $documents->update($avatar, [], $uploader, $request->file('file'));
         } else {
-            $documents->upload($request->file('file'), $user, $user, 'user.avatar', ['title' => 'Foto de perfil']);
+            $documents->upload($request->file('file'), $user, $uploader, 'user.avatar', ['title' => 'Foto de perfil']);
         }
 
         return back()->with('status', 'Foto de perfil actualizada.');

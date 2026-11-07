@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\LoginAttempt;
 use App\Models\User;
 use App\Services\LoginAttemptRecorder;
+use App\Support\ImpersonationManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -64,8 +65,12 @@ class LoginController extends Controller
         return redirect()->intended($fallback);
     }
 
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request, ImpersonationManager $impersonation): RedirectResponse
     {
+        if ($impersonation->active()) {
+            $impersonation->finish($request, 'logout', false);
+        }
+
         Auth::guard()->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

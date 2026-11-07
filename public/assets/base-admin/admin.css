@@ -300,3 +300,14 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--teal); }
 .password-visibility-toggle:focus-visible{outline:3px solid #64b9bb;outline-offset:1px}
 .password-visibility-toggle svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.8}
 .password-visibility-toggle[hidden]{display:none}
+
+/* Persistent administrative impersonation indicator */
+.impersonation-banner{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:11px clamp(16px,3vw,34px);border-bottom:1px solid #c2a448;color:#2d2818;background:#fff3c4}
+.impersonation-banner>div{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;min-width:0}
+.impersonation-banner strong{font-size:.9rem}
+.impersonation-banner span{font-size:.82rem}
+.impersonation-banner form{flex:none}
+.impersonation-banner .button{white-space:nowrap}
+.audit-values>strong{display:block;margin-top:10px}
+.badge-warning{color:#614b0c;background:#fff0b8}
+@media(max-width:620px){.impersonation-banner{align-items:stretch;flex-direction:column;gap:9px;padding:11px 15px}.impersonation-banner>div{display:grid;gap:3px}.impersonation-banner form,.impersonation-banner .button{width:100%}}

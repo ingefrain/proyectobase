@@ -45,6 +45,7 @@ class AdministrativeAccess
     /** @param list<int> $roleIds */
     public function syncUserRoles(User $actor, User $target, array $roleIds): bool
     {
+        $actor = app(ImpersonationManager::class)->actor() ?? $actor;
         $roles = Role::query()->whereIn('id', $roleIds)->where('is_active', true)->with('permissions')->get();
         if ($roles->count() !== count(array_unique($roleIds))) {
             throw ValidationException::withMessages(['role_ids' => 'Selecciona roles activos válidos.']);
@@ -68,6 +69,7 @@ class AdministrativeAccess
     /** @param list<int> $permissionIds */
     public function syncRolePermissions(User $actor, Role $role, array $permissionIds): bool
     {
+        $actor = app(ImpersonationManager::class)->actor() ?? $actor;
         $permissions = Permission::query()->whereIn('id', $permissionIds)->get();
         if ($permissions->count() !== count(array_unique($permissionIds))) {
             throw ValidationException::withMessages(['permission_ids' => 'Selecciona permisos válidos.']);
@@ -75,6 +77,10 @@ class AdministrativeAccess
 
         if ($permissions->pluck('key')->diff($actor->permissionKeys())->isNotEmpty()) {
             throw ValidationException::withMessages(['permission_ids' => 'No puedes asignar capacidades que no tienes.']);
+        }
+
+        if ($role->key !== 'administrator' && $permissions->contains('key', 'users.impersonate')) {
+            throw ValidationException::withMessages(['permission_ids' => 'La capacidad de impersonación solo puede pertenecer al rol administrador.']);
         }
 
         $before = $role->permissions()->pluck('permissions.id')->sort()->values()->all();

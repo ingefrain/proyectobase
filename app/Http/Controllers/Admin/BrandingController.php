@@ -7,6 +7,7 @@ use App\Models\ApplicationBranding;
 use App\Services\Documents\DocumentService;
 use App\Services\Documents\ManagedDocumentPath;
 use App\Support\AdminAuditLogger;
+use App\Support\ImpersonationManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -19,7 +20,7 @@ class BrandingController extends Controller
         return view('admin.branding', ['branding' => ApplicationBranding::current()]);
     }
 
-    public function update(Request $request, DocumentService $documents, AdminAuditLogger $audit): RedirectResponse
+    public function update(Request $request, DocumentService $documents, AdminAuditLogger $audit, ImpersonationManager $impersonation): RedirectResponse
     {
         $validated = $request->validate([
             'visible_name' => ['nullable', 'string', 'max:120'],
@@ -33,7 +34,7 @@ class BrandingController extends Controller
             $audit->record('branding.name_updated', 'application_branding', '1', ['visible_name' => $before], ['visible_name' => $branding->visible_name]);
         }
         if ($request->hasFile('logo')) {
-            $actor = $request->user();
+            $actor = $impersonation->actor() ?? $request->user();
             $existing = $branding->logo;
             if ($existing) {
                 $documents->update($existing, [], $actor, $request->file('logo'));

@@ -11,6 +11,7 @@ class BasePermissions
         'users.create' => 'Crear usuarios',
         'users.update' => 'Editar usuarios',
         'users.disable' => 'Activar o desactivar usuarios',
+        'users.impersonate' => 'Iniciar sesión temporal como otro usuario',
         'roles.view' => 'Consultar roles',
         'roles.create' => 'Crear roles',
         'roles.update' => 'Editar roles',

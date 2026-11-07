@@ -7,6 +7,7 @@ use App\Models\Document;
 use App\Services\Documents\DocumentOwnerAccess;
 use App\Services\Documents\DocumentService;
 use App\Services\Documents\ManagedDocumentPath;
+use App\Support\ImpersonationManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -62,7 +63,7 @@ class DocumentController extends Controller
         return view('admin.documents.index', compact('documents', 'filters', 'categories'));
     }
 
-    public function store(Request $request, DocumentService $documents): RedirectResponse
+    public function store(Request $request, DocumentService $documents, ImpersonationManager $impersonation): RedirectResponse
     {
         $validated = $request->validate([
             'file' => ['required', 'file'],
@@ -73,7 +74,7 @@ class DocumentController extends Controller
         $document = $documents->upload(
             $request->file('file'),
             $request->user(),
-            $request->user(),
+            $impersonation->actor() ?? $request->user(),
             $validated['category'],
             $validated,
         );

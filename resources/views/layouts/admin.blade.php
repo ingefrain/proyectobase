@@ -11,24 +11,38 @@
 </head>
 <body class="admin-body">
     <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    @php($impersonation = app(\App\Support\ImpersonationManager::class))
+    @php($navigationUser = $impersonation->effectiveUser())
+    @php($navigationCan = fn (string $permission): bool => $impersonation->active() ? (bool) $navigationUser?->hasPermissionTo($permission) : (bool) $navigationUser?->can($permission))
     <div class="admin-shell">
         <button class="drawer-scrim" type="button" data-drawer-close aria-label="Cerrar menú" tabindex="-1"></button>
         <aside class="sidebar" id="admin-sidebar" aria-label="Navegación administrativa">
-            <a class="brand" href="{{ auth()->user()->can('dashboard.view') ? route('admin.dashboard') : route('admin.settings.index') }}">
+            <a class="brand" href="{{ $navigationCan('dashboard.view') ? route('admin.dashboard') : ($navigationCan('users.view') ? route('admin.settings.index') : route('admin.profile.edit')) }}">
                 @if($branding->logo)<img class="brand-logo" src="{{ route('branding.logo') }}?v={{ substr($branding->logo->checksum, 0, 16) }}" alt="">@else<span class="brand-mark" aria-hidden="true">PB</span>@endif
                 <span><strong>{{ $branding->displayName() }}</strong><small>Administración</small></span>
             </a>
             <nav class="side-navigation" aria-label="Principal">
-                @can('dashboard.view')
+                @if($navigationCan('dashboard.view'))
                     <a class="side-link {{ request()->routeIs('admin.dashboard') ? 'is-active' : '' }}" href="{{ route('admin.dashboard') }}" @if(request()->routeIs('admin.dashboard')) aria-current="page" @endif>Resumen</a>
-                @endcan
-                @canany(['users.view', 'roles.view', 'notifications.view', 'documents.view', 'system.audit.view'])
+                @endif
+                @if($navigationCan('users.view') || $navigationCan('roles.view') || $navigationCan('notifications.view') || $navigationCan('documents.view') || $navigationCan('system.audit.view'))
                     <a class="side-link {{ request()->routeIs('admin.settings.*', 'admin.users.*', 'admin.roles.*', 'admin.system-audit.*', 'admin.system-status.*', 'admin.login-security.*', 'admin.permissions.*', 'admin.audit.*', 'admin.notifications.*', 'admin.documents.*') ? 'is-active' : '' }}" href="{{ route('admin.settings.index') }}" @if(request()->routeIs('admin.settings.*', 'admin.users.*', 'admin.roles.*', 'admin.system-audit.*', 'admin.system-status.*', 'admin.login-security.*', 'admin.permissions.*', 'admin.audit.*', 'admin.notifications.*', 'admin.documents.*')) aria-current="page" @endif>Configuración</a>
-                @endcanany
+                @endif
             </nav>
         </aside>
 
         <div class="workspace">
+            @if($impersonation->active())
+                @php($impersonationActor = $impersonation->actor())
+                @php($impersonationTarget = $impersonation->effectiveUser())
+                <section class="impersonation-banner" aria-label="Sesión de impersonación activa">
+                    <div><strong>Estás actuando como {{ $impersonationTarget?->name ?? 'usuario' }}{{ $impersonationTarget?->is_active ? '' : ' · cuenta inactiva' }}.</strong><span>Sesión iniciada por {{ $impersonationActor?->name ?? 'administrador' }}.</span></div>
+                    <form method="POST" action="{{ route('admin.impersonation.stop') }}">
+                        @csrf
+                        <button class="button button-secondary button-small" type="submit">Volver a mi sesión</button>
+                    </form>
+                </section>
+            @endif
             <header class="topbar">
                 <div class="topbar-start">
                     <button class="menu-toggle" type="button" data-menu-toggle aria-label="Abrir menú de navegación" aria-controls="admin-sidebar" aria-expanded="false">☰</button>

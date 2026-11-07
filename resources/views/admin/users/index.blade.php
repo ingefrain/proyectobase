@@ -44,6 +44,14 @@
                         <td data-label="Rol"><div class="badge-list">@forelse($user->roles as $role)<span class="badge badge-neutral">{{ $role->name }}</span>@empty<span class="muted">Sin rol</span>@endforelse</div></td>
                         <td data-label="Estado"><span class="badge {{ $user->is_active ? 'badge-success' : 'badge-muted' }}">{{ $user->is_active ? 'Activo' : 'Inactivo' }}</span></td>
                         <td class="row-actions" data-label="Acciones">
+                            @can('users.impersonate')
+                                @if(!app(\App\Support\ImpersonationManager::class)->active() && (int) $user->id !== (int) auth()->id())
+                                    <form method="POST" action="{{ route('admin.users.impersonate', $user) }}" onsubmit="return confirm(@js('¿Deseas iniciar sesión como '.$user->name.' ('.$user->email.')?'.($user->is_active ? '' : ' La cuenta está inactiva y seguirá inactiva.').' Podrás volver a tu sesión administrativa en cualquier momento. La acción quedará registrada en auditoría.'))">
+                                        @csrf
+                                        <button class="button button-secondary button-small" type="submit" aria-label="Impersonar a {{ $user->name }}">Ver como usuario</button>
+                                    </form>
+                                @endif
+                            @endcan
                             @can('users.update')<a class="button button-secondary button-small" href="{{ route('admin.users.edit', $user) }}">Editar</a>@endcan
                             @can('users.disable')
                                 <form method="POST" action="{{ route('admin.users.status', $user) }}">

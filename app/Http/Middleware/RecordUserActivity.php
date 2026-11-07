@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\ImpersonationManager;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +12,10 @@ class RecordUserActivity
 {
     public function handle(Request $request, Closure $next): Response
     {
+        if (app(ImpersonationManager::class)->active()) {
+            return $next($request);
+        }
+
         $user = $request->user();
 
         if ($user) {

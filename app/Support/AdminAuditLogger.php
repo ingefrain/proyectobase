@@ -20,15 +20,25 @@ class AdminAuditLogger
         ?array $context = null,
         ?int $actorId = null,
     ): AdminAuditEvent {
+        $impersonation = app(ImpersonationManager::class);
+        $actor = $impersonation->actor();
+        $context = $context ?? [];
+        if ($impersonation->active()) {
+            $context['impersonation'] = array_merge(
+                $impersonation->auditContext(),
+                $context['impersonation'] ?? [],
+            );
+        }
+
         return AdminAuditEvent::query()->create([
-            'actor_id' => $actorId ?? auth()->id(),
+            'actor_id' => $impersonation->active() ? $actor?->id : ($actorId ?? $actor?->id),
             'action' => $action,
             'entity_type' => $entityType,
             'entity_id' => $entityId === null ? null : (string) $entityId,
             'before' => $this->sanitize($before),
             'after' => $this->sanitize($after),
             'ip_address' => app()->runningInConsole() ? null : request()->ip(),
-            'context' => $this->sanitize($context),
+            'context' => $this->sanitize($context === [] ? null : $context),
             'created_at' => now(),
         ]);
     }

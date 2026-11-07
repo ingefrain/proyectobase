@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\AvatarController;
 use App\Http\Controllers\Admin\BrandingController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocumentController;
+use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\LoginSecurityController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PermissionController;
@@ -33,7 +34,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::post('/password/reset', [NewPasswordController::class, 'store'])->middleware('throttle:admin-password')->name('password.update');
     });
 
-    Route::middleware(['auth', 'account.active', 'session.current'])->group(function (): void {
+    Route::middleware(['auth', 'impersonation', 'account.active', 'session.current'])->group(function (): void {
         Route::get('/', DashboardController::class)->middleware('can:dashboard.view')->name('dashboard');
         Route::get('/settings', SettingsController::class)->name('settings.index');
         Route::get('/system-audit', SystemAuditController::class)->middleware('can:system.audit.view')->name('system-audit.index');
@@ -41,6 +42,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/system-audit/login-security', LoginSecurityController::class)
             ->middleware('can:security.login.view')->name('login-security.index');
         Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+        Route::post('/impersonation/stop', [ImpersonationController::class, 'stop'])->name('impersonation.stop');
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
@@ -54,6 +56,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/users/{user}/avatar', [AvatarController::class, 'user'])->middleware('can:users.view')->name('users.avatar');
 
         Route::get('/users', [UserController::class, 'index'])->middleware('can:users.view')->name('users.index');
+        Route::post('/users/{user}/impersonate', [ImpersonationController::class, 'start'])->middleware('can:users.impersonate')->name('users.impersonate');
         Route::get('/users/create', [UserController::class, 'create'])->middleware('can:users.create')->name('users.create');
         Route::post('/users', [UserController::class, 'store'])->middleware('can:users.create')->name('users.store');
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->middleware('can:users.update')->name('users.edit');
