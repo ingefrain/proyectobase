@@ -94,5 +94,6 @@
     </div>
     <script src="{{ asset('assets/base-admin/admin.js') }}?v={{ filemtime(public_path('assets/base-admin/admin.js')) }}" defer></script>
     <script src="{{ asset('assets/base-admin/markdown-editor.js') }}?v={{ filemtime(public_path('assets/base-admin/markdown-editor.js')) }}" defer></script>
+    @stack('admin-scripts')
 </body>
 </html>

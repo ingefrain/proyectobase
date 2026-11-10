@@ -4,6 +4,7 @@ return [
     'enabled' => env('ADMIN_COMPONENTS_ENABLED', true),
 
     'cards' => [
+        ['key' => 'charts', 'title' => 'Gráficas', 'description' => 'Visualización reutilizable de datos mediante Chart.js.', 'route' => 'admin.components.charts'],
         ['key' => 'utilities', 'title' => 'Utilidades', 'description' => 'Controles y feedback reutilizables para interacciones administrativas.', 'route' => 'admin.components.utilities'],
         ['key' => 'confirmations', 'title' => 'Confirmaciones y avisos', 'description' => 'Diálogos de confirmación y mensajes de estado reutilizables.', 'route' => 'admin.components.confirmations'],
         ['key' => 'markdown', 'title' => 'Markdown', 'description' => 'Editor Markdown con toolbar y vista previa segura.', 'route' => 'admin.components.markdown'],

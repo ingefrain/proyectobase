@@ -116,6 +116,36 @@ code { color: #274c61; font-size: .88em; overflow-wrap: anywhere; }
 .filter-bar input, .filter-bar select { min-height: 40px; }
 .filter-actions { padding-bottom: 1px; }
 .table-wrap { width: 100%; overflow-x: auto; }
+.admin-chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.admin-chart-card {
+    --chart-1: var(--teal);
+    --chart-2: #315b80;
+    --chart-3: var(--success);
+    --chart-4: #95631d;
+    --chart-5: var(--danger);
+    --chart-6: #62568c;
+    --chart-7: #4e7287;
+    --chart-8: #6d604a;
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow-wrap: anywhere;
+}
+.admin-chart-card h3 { margin: 0 0 6px; }
+.admin-chart { position: relative; width: 100%; min-width: 0; height: 300px; }
+.admin-chart canvas { max-width: 100%; }
+.admin-chart-small { height: 220px; }
+.admin-chart-large { height: 400px; }
+.admin-chart-data { margin-top: 12px; }
+.admin-chart-data summary { cursor: pointer; font-weight: 700; }
+.admin-chart-data .table-wrap { margin-top: 8px; }
+@media (max-width: 850px) { .admin-chart-grid { grid-template-columns: minmax(0, 1fr); } }
+@media print {
+    .admin-chart { display: none; }
+    .admin-chart-grid { display: block; }
+    .admin-chart-card { break-inside: avoid; margin-bottom: 12px; }
+}
 .catalog-thumbnail { display: block; width: 48px; height: 48px; object-fit: cover; border-radius: 8px; }
 .catalog-image-preview { display: block; width: min(220px, 100%); max-height: 160px; object-fit: contain; object-position: left center; }
 .admin-form-surface.report-hub { max-width: 920px; }

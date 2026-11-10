@@ -36,13 +36,14 @@ class ComponentCatalogTest extends TestCase
 
     public function test_catalog_requires_login_and_technical_permission(): void
     {
-        foreach (['index', 'markdown', 'dropzone', 'password', 'modal', 'multi-select', 'confirmations', 'utilities'] as $demo) {
+        foreach (['index', 'markdown', 'dropzone', 'password', 'modal', 'multi-select', 'confirmations', 'utilities', 'charts'] as $demo) {
             $this->get(route('admin.components.'.$demo))->assertRedirect(route('admin.login'));
         }
         $user = User::factory()->create(['is_active' => true]);
         $this->actingAsAdmin($user)->get(route('admin.profile.edit'))->assertDontSee(route('admin.components.index'));
         $this->get(route('admin.components.markdown'))->assertForbidden();
         $this->get(route('admin.components.confirmations'))->assertForbidden();
+        $this->get(route('admin.components.charts'))->assertForbidden();
     }
 
     public function test_catalog_is_hidden_and_blocked_when_disabled_or_outside_local(): void
@@ -55,6 +56,7 @@ class ComponentCatalogTest extends TestCase
         $this->app->instance('env', 'production');
         $this->get(route('admin.dashboard'))->assertDontSee(route('admin.components.index'));
         $this->get(route('admin.components.password'))->assertNotFound();
+        $this->get(route('admin.components.charts'))->assertNotFound();
     }
 
     public function test_utilities_groups_the_toggle_and_notify_and_retires_the_old_route(): void
@@ -67,6 +69,18 @@ class ComponentCatalogTest extends TestCase
                 ->assertSee('data-notify-template="'.$type.'"', false);
         }
         $this->get('/admin/components/status-toggle')->assertNotFound();
+    }
+
+    public function test_charts_demo_renders_four_accessible_examples_in_local(): void
+    {
+        $this->actingAsAdmin();
+        $page = $this->get(route('admin.components.charts'))->assertOk()
+            ->assertSee('Datos demostrativos.')
+            ->assertSee('50.00 %');
+        foreach (['bar', 'line', 'doughnut', 'pie'] as $type) {
+            $page->assertSee('"type":"'.$type.'"', false);
+        }
+        $this->assertSame(4, substr_count($page->getContent(), '<summary>Ver datos</summary>'));
     }
 
     public function test_flash_notify_escapes_text_and_falls_back_to_info_for_an_invalid_type(): void

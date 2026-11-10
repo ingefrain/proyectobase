@@ -55,7 +55,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             ->middleware([EnsureComponentCatalogEnabled::class, 'can:system.audit.view'])
             ->group(function (): void {
                 Route::view('/', 'admin.components.index')->name('index');
-                foreach (['markdown', 'dropzone', 'password', 'modal', 'multi-select', 'confirmations', 'utilities'] as $demo) {
+                foreach (['markdown', 'dropzone', 'password', 'modal', 'multi-select', 'confirmations', 'utilities', 'charts'] as $demo) {
                     Route::view($demo, 'admin.components.'.$demo)->name($demo);
                 }
             });
