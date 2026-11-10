@@ -7,6 +7,8 @@ class BasePermissions
     /** @var array<string, string> */
     public const DEFINITIONS = [
         'dashboard.view' => 'Ver el resumen administrativo',
+        'reports.view' => 'Consultar reportes administrativos',
+        'reports.export' => 'Exportar reportes administrativos',
         'users.view' => 'Consultar usuarios',
         'users.create' => 'Crear usuarios',
         'users.update' => 'Editar usuarios',

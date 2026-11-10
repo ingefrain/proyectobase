@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\OrganizationController;
 use App\Http\Controllers\Admin\OrganizationLogoController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\SystemAuditController;
@@ -40,6 +41,13 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     });
 
     Route::middleware(['auth', 'impersonation', 'account.active', 'session.current'])->group(function (): void {
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        foreach (array_keys(config('admin_reports.reports')) as $key) {
+            Route::get('/reports/'.$key, [ReportController::class, 'show'])
+                ->defaults('key', $key)->name('reports.'.$key);
+            Route::get('/reports/'.$key.'/export', [ReportController::class, 'export'])
+                ->defaults('key', $key)->name('reports.'.$key.'.export');
+        }
         Route::post('/markdown/preview', MarkdownPreviewController::class)->name('markdown.preview');
         Route::prefix('components')->name('components.')
             ->middleware([EnsureComponentCatalogEnabled::class, 'can:system.audit.view'])

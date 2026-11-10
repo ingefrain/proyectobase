@@ -14,7 +14,7 @@ class AuditController extends Controller
     {
         $filters = $request->validate([
             'action' => ['nullable', 'string', 'max:100'],
-            'entity' => ['nullable', Rule::in(['user', 'role'])],
+            'entity' => ['nullable', Rule::in(['user', 'role', 'report'])],
         ]);
         $events = AdminAuditEvent::query()->with('actor')
             ->when($filters['action'] ?? null, fn ($query, string $action) => $query->where('action', $action))
