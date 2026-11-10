@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="{{ asset('assets/base-admin/markdown.css') }}?v={{ filemtime(public_path('assets/base-admin/markdown.css')) }}">
     @php($branding = \App\Models\ApplicationBranding::current())
     <title>@yield('title', 'Resumen') · {{ $branding->displayName() }}</title>
     <link rel="stylesheet" href="{{ asset('assets/base-admin/admin.css') }}?v={{ filemtime(public_path('assets/base-admin/admin.css')) }}">
@@ -85,5 +86,6 @@
         </div>
     </div>
     <script src="{{ asset('assets/base-admin/admin.js') }}?v={{ filemtime(public_path('assets/base-admin/admin.js')) }}" defer></script>
+    <script src="{{ asset('assets/base-admin/markdown-editor.js') }}?v={{ filemtime(public_path('assets/base-admin/markdown-editor.js')) }}" defer></script>
 </body>
 </html>

@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\LoginSecurityController;
+use App\Http\Controllers\Admin\MarkdownPreviewController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\OrganizationController;
 use App\Http\Controllers\Admin\OrganizationLogoController;
@@ -38,6 +39,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     });
 
     Route::middleware(['auth', 'impersonation', 'account.active', 'session.current'])->group(function (): void {
+        Route::post('/markdown/preview', MarkdownPreviewController::class)->name('markdown.preview');
         Route::get('/', DashboardController::class)->middleware('can:dashboard.view')->name('dashboard');
         Route::get('/settings', SettingsController::class)->name('settings.index');
         Route::get('/system-audit', SystemAuditController::class)->middleware('can:system.audit.view')->name('system-audit.index');
