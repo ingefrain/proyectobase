@@ -30,7 +30,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::middleware('guest')->group(function (): void {
         Route::get('/login', [LoginController::class, 'create'])->name('login');
         Route::post('/login', [LoginController::class, 'store'])
-            ->middleware('throttle:admin-login')->name('login.store');
+            ->name('login.store');
         Route::get('/password/forgot', [PasswordResetLinkController::class, 'create'])->name('password.request');
         Route::post('/password/forgot', [PasswordResetLinkController::class, 'store'])->middleware('throttle:admin-password')->name('password.email');
         Route::get('/password/reset/{token}', [NewPasswordController::class, 'create'])->name('password.reset');

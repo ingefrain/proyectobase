@@ -32,6 +32,7 @@ code { color: #274c61; font-size: .88em; overflow-wrap: anywhere; }
 .admin-shell { min-height: 100vh; display: grid; grid-template-columns: 258px minmax(0, 1fr); }
 .sidebar { position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh; padding: 22px 16px 16px; color: #eff6f8; background: var(--navy); }
 .brand, .guest-brand { display: flex; align-items: center; gap: 11px; color: inherit; text-decoration: none; }
+.sidebar .brand:hover, .sidebar .brand:focus-visible { color: #fff; }
 .brand { padding: 0 8px 24px; }
 .brand strong, .brand small, .guest-brand strong, .guest-brand small { display: block; }
 .brand strong, .guest-brand strong { font-size: 1rem; letter-spacing: .01em; }
@@ -199,6 +200,13 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--teal); }
 .guest-card .muted { margin-bottom: 24px; }
 .guest-card .stack-form { gap: 9px; }
 .guest-card .stack-form label:not(.check-row) { margin-top: 8px; }
+.login-limit-notice { margin-bottom: 16px; padding: 14px 16px; border-left: 4px solid var(--teal); border-radius: 8px; background: #eef6f7; }
+.login-limit-notice h2 { font-size: 1rem; }
+.login-limit-notice p { margin: 0 0 8px; }
+.login-limit-notice p:last-child, [data-login-ready]:empty { margin: 0; }
+.login-limit-notice [data-login-seconds] { font-variant-numeric: tabular-nums; }
+.stack-form > label.login-remember { white-space: normal; }
+.guest-card :is(input, button):disabled { color: #425a68; background: #e6edf0; cursor: not-allowed; }
 .form-footnote { margin: 20px 0 0; text-align: center; font-size: .85rem; }
 
 @media (max-width: 900px) {

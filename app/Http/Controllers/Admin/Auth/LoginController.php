@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Admin\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\LoginAttempt;
 use App\Models\User;
+use App\Services\AdminLoginLimiter;
 use App\Services\LoginAttemptRecorder;
 use App\Support\ImpersonationManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -26,7 +28,7 @@ class LoginController extends Controller
         return redirect()->route($route);
     }
 
-    public function store(Request $request, LoginAttemptRecorder $recorder): RedirectResponse
+    public function store(Request $request, LoginAttemptRecorder $recorder, AdminLoginLimiter $limiter): RedirectResponse|Response
     {
         $credentials = $request->validate([
             'email' => ['required', 'email', 'max:255'],
@@ -37,9 +39,24 @@ class LoginController extends Controller
         $remember = $request->boolean('remember');
         unset($credentials['remember']);
 
+        $email = $credentials['email'];
+        $ip = (string) $request->ip();
+        $retryAfter = $limiter->retryAfter($email, $ip);
+        if ($retryAfter > 0) {
+            $recorder->record($request, LoginAttempt::RATE_LIMITED, 'rate_limit_exceeded');
+
+            return response()->view('admin.auth.login', ['retryAfter' => $retryAfter, 'loginEmail' => $email], 429, [
+                'Retry-After' => (string) $retryAfter,
+                'Cache-Control' => 'private, no-store',
+                'X-Content-Type-Options' => 'nosniff',
+                'Referrer-Policy' => 'no-referrer',
+            ]);
+        }
+
         $attemptedUser = User::query()->select(['id', 'email', 'is_active'])->where('email', $credentials['email'])->first();
 
         if (! Auth::attempt([...$credentials, 'is_active' => true], $remember)) {
+            $limiter->recordFailure($email, $ip);
             $inactive = $attemptedUser !== null && ! $attemptedUser->is_active;
             $recorder->record(
                 $request,
@@ -52,6 +69,7 @@ class LoginController extends Controller
         }
 
         $user = $request->user();
+        $limiter->clearIdentity($email, $ip);
         $user->forceFill(['last_login_at' => now(), 'last_login_ip' => $request->ip()])->save();
         $recorder->record($request, LoginAttempt::SUCCESS, 'authenticated', $user);
 

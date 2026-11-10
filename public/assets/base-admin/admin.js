@@ -1,4 +1,26 @@
 (() => {
+    document.querySelectorAll('[data-password-toggle]').forEach(button => {
+        const input = document.getElementById(button.getAttribute('aria-controls'));
+        const slash = button.querySelector('[data-eye-slash]');
+        if (!input || !slash) return;
+        button.hidden = false;
+        const setVisible = visible => {
+            input.type = visible ? 'text' : 'password';
+            button.setAttribute('aria-pressed', String(visible));
+            button.setAttribute('aria-label', visible ? 'Ocultar contraseña' : 'Mostrar contraseña');
+            slash.hidden = visible;
+        };
+        button.addEventListener('click', () => {
+            const visible = input.type === 'password';
+            setVisible(visible);
+            input.focus({ preventScroll: true });
+        });
+        input.form?.addEventListener('submit', () => setVisible(false));
+        window.addEventListener('pagehide', () => setVisible(false));
+    });
+})();
+
+(() => {
     const shell = document.querySelector('.admin-shell');
     const toggle = document.querySelector('[data-menu-toggle]');
     const close = document.querySelector('[data-drawer-close]');
@@ -41,26 +63,6 @@
             dialog._focusReturn = null;
         });
         if (dialog.hasAttribute('data-open-on-load')) openModal(dialog, null);
-    });
-
-    document.querySelectorAll('[data-password-toggle]').forEach(button => {
-        const input = document.getElementById(button.getAttribute('aria-controls'));
-        const slash = button.querySelector('[data-eye-slash]');
-        if (!input || !slash) return;
-        button.hidden = false;
-        const setVisible = visible => {
-            input.type = visible ? 'text' : 'password';
-            button.setAttribute('aria-pressed', String(visible));
-            button.setAttribute('aria-label', visible ? 'Ocultar contraseña' : 'Mostrar contraseña');
-            slash.hidden = visible;
-        };
-        button.addEventListener('click', () => {
-            const visible = input.type === 'password';
-            setVisible(visible);
-            input.focus({ preventScroll: true });
-        });
-        input.form?.addEventListener('submit', () => setVisible(false));
-        window.addEventListener('pagehide', () => setVisible(false));
     });
 
     document.querySelectorAll('[data-role-selector]').forEach(selector => {

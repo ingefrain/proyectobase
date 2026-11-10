@@ -7,7 +7,6 @@ use App\Models\Role;
 use App\Models\User;
 use App\Support\BasePermissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Tests\Feature\Concerns\InteractsWithBaseAdmin;
@@ -60,10 +59,6 @@ class LoginSecurityTest extends TestCase
     public function test_rate_limited_login_creates_a_safe_technical_attempt(): void
     {
         $email = 'rate+'.Str::uuid().'@example.test';
-        $accountKey = 'admin-login:account:'.hash('sha256', $email);
-        RateLimiter::clear($accountKey);
-        RateLimiter::clear('admin-login:ip:127.0.0.1');
-
         for ($attempt = 0; $attempt < 5; $attempt++) {
             $this->post(route('admin.login.store'), ['email' => $email, 'password' => 'Secret-not-to-store'])
                 ->assertSessionHasErrors('email');

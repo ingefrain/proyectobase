@@ -6,6 +6,7 @@ use App\Models\AdminAuditEvent;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\AdminLoginLimiter;
 use App\Support\ImpersonationManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -30,6 +31,12 @@ class ImpersonationTest extends TestCase
         $targetActivityAt = $target->last_activity_at;
         $targetRememberToken = $target->remember_token;
         $attemptsBefore = DB::table('login_attempts')->count();
+        $limiter = app(AdminLoginLimiter::class);
+        foreach ([$actor, $target] as $account) {
+            for ($failure = 0; $failure < 4; $failure++) {
+                $limiter->recordFailure($account->email, '127.0.0.1');
+            }
+        }
 
         $this->actingAsAdmin($actor)->get(route('admin.users.index'))->assertOk()->assertSee('Ver como usuario');
 
@@ -63,6 +70,14 @@ class ImpersonationTest extends TestCase
 
         $this->post(route('admin.impersonation.stop'))->assertRedirect(route('admin.users.index'));
         $this->assertAuthenticatedAs($actor);
+        $this->assertSame($attemptsBefore, DB::table('login_attempts')->count());
+        $this->assertSame($targetLoginAt, $target->fresh()->last_login_at);
+        $this->assertSame($actor->last_login_at->toDateTimeString(), $actor->fresh()->last_login_at->toDateTimeString());
+        foreach ([$actor, $target] as $account) {
+            $this->assertSame(0, $limiter->retryAfter($account->email, '127.0.0.1'));
+            $limiter->recordFailure($account->email, '127.0.0.1');
+            $this->assertGreaterThan(0, $limiter->retryAfter($account->email, '127.0.0.1'));
+        }
         $this->assertDatabaseHas('admin_audit_events', [
             'actor_id' => $actor->id,
             'action' => 'impersonation.ended',

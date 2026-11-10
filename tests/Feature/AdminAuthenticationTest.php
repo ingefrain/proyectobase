@@ -3,14 +3,15 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Services\AdminLoginLimiter;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Tests\Feature\Concerns\InteractsWithBaseAdmin;
 use Tests\TestCase;
@@ -84,16 +85,32 @@ class AdminAuthenticationTest extends TestCase
 
     public function test_login_is_limited_by_account_and_ip(): void
     {
+        $this->freezeTime();
         $email = 'rate+'.Str::uuid().'@example.test';
-        RateLimiter::clear('admin-login:account:'.hash('sha256', $email));
 
         for ($attempt = 0; $attempt < 5; $attempt++) {
             $this->post(route('admin.login.store'), ['email' => $email, 'password' => 'incorrecta'])
                 ->assertSessionHasErrors('email');
         }
 
-        $this->post(route('admin.login.store'), ['email' => $email, 'password' => 'incorrecta'])
-            ->assertTooManyRequests();
+        $payload = ['email' => $email, 'password' => 'incorrecta'];
+        $this->post(route('admin.login.store'), $payload)
+            ->assertTooManyRequests()
+            ->assertHeader('Retry-After', '60')
+            ->assertHeader('Cache-Control', 'no-store, private')
+            ->assertSee('data-login-retry="60"', false)
+            ->assertSee(route('admin.password.request'))
+            ->assertDontSee('incorrecta');
+
+        $this->travel(15)->seconds();
+        $this->withHeader('X-Forwarded-For', '192.0.2.12')
+            ->post(route('admin.login.store'), $payload)
+            ->assertTooManyRequests()->assertHeader('Retry-After', '45');
+        $this->withServerVariables(['REMOTE_ADDR' => '192.0.2.13'])
+            ->post(route('admin.login.store'), $payload)->assertSessionHasErrors('email');
+        $this->withServerVariables(['REMOTE_ADDR' => '127.0.0.1']);
+        $this->travel(46)->seconds();
+        $this->post(route('admin.login.store'), $payload)->assertSessionHasErrors('email');
     }
 
     public function test_logout_invalidates_the_session(): void
@@ -104,6 +121,43 @@ class AdminAuthenticationTest extends TestCase
         $this->post(route('admin.logout'))->assertRedirect(route('admin.login'));
         $this->assertGuest();
         $this->assertNotSame($token, session()->token());
+    }
+
+    public function test_invalid_forms_do_not_consume_login_quota(): void
+    {
+        $email = 'valid@example.test';
+        for ($attempt = 0; $attempt < 6; $attempt++) {
+            $this->post(route('admin.login.store'), ['email' => $email])->assertSessionHasErrors('password');
+        }
+
+        $this->post(route('admin.login.store'), ['email' => $email, 'password' => 'incorrecta'])
+            ->assertSessionHasErrors('email');
+        $this->assertDatabaseCount('login_attempts', 1);
+    }
+
+    public function test_identity_clear_preserves_ip_failures(): void
+    {
+        $this->freezeTime();
+        $limiter = app(AdminLoginLimiter::class);
+        $ip = '127.0.0.1';
+        $user = $this->adminUser(['password' => 'Una-clave-segura-123!']);
+        for ($attempt = 0; $attempt < 4; $attempt++) {
+            $limiter->recordFailure($user->email, $ip);
+        }
+        $this->post(route('admin.login.store'), ['email' => $user->email, 'password' => 'Una-clave-segura-123!'])
+            ->assertRedirect(route('admin.dashboard'));
+        $this->post(route('admin.logout'))->assertRedirect();
+        $limiter->recordFailure($user->email, $ip);
+        $this->assertSame(0, $limiter->retryAfter($user->email, $ip));
+        $this->travel(10)->seconds();
+        for ($attempt = 0; $attempt < 25; $attempt++) {
+            $limiter->recordFailure('other@example.test', $ip);
+        }
+
+        $this->post(route('admin.login.store'), ['email' => 'third@example.test', 'password' => 'incorrecta'])
+            ->assertTooManyRequests()->assertHeader('Retry-After', '50');
+        $this->assertSame(60, $limiter->retryAfter('other@example.test', $ip));
+        $this->assertSame(0, $limiter->retryAfter('other@example.test', '192.0.2.21'));
     }
 
     public function test_password_recovery_response_is_generic_and_notifies_only_active_users(): void
@@ -198,5 +252,42 @@ class AdminAuthenticationTest extends TestCase
         } finally {
             Carbon::setTestNow();
         }
+    }
+
+    public function test_login_keys_are_scoped_hmac_digests(): void
+    {
+        $limiter = app(AdminLoginLimiter::class);
+        $email = 'identity@example.test';
+        $ip = '192.0.2.22';
+        $method = new \ReflectionMethod($limiter, 'identityKey');
+        $key = $method->invoke($limiter, $email, $ip);
+        $expected = 'admin-login:'.hash_hmac('sha256', "identity-ip\0".$email."\0".$ip, config('app.key'));
+        $this->assertTrue(hash_equals($expected, $key));
+        $this->assertTrue(! str_contains($key, $email) && ! str_contains($key, $ip));
+        $this->assertTrue($key !== $method->invoke($limiter, 'other@example.test', $ip));
+        $this->assertTrue($key !== $method->invoke($limiter, $email, '192.0.2.23'));
+    }
+
+    public function test_csrf_rejection_does_not_count_as_login_failure(): void
+    {
+        $this->app->bind(ValidateCsrfToken::class, function ($app) {
+            return new class($app, $app['encrypter']) extends ValidateCsrfToken
+            {
+                protected function runningUnitTests()
+                {
+                    return false;
+                }
+            };
+        });
+
+        $email = 'csrf@example.test';
+        $payload = ['email' => $email, 'password' => 'incorrecta'];
+        $this->post(route('admin.login.store'), $payload)->assertStatus(419);
+        $this->assertDatabaseCount('login_attempts', 0);
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $this->post(route('admin.login.store'), $payload + ['_token' => session()->token()])
+                ->assertSessionHasErrors('email');
+        }
+        $this->assertDatabaseCount('login_attempts', 5);
     }
 }
