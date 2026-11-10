@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\Auth\NewPasswordController;
 use App\Http\Controllers\Admin\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Admin\AvatarController;
 use App\Http\Controllers\Admin\BrandingController;
+use App\Http\Controllers\Admin\CatalogController;
+use App\Http\Controllers\Admin\CatalogItemController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\ImpersonationController;
@@ -53,7 +55,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             ->middleware([EnsureComponentCatalogEnabled::class, 'can:system.audit.view'])
             ->group(function (): void {
                 Route::view('/', 'admin.components.index')->name('index');
-                foreach (['markdown', 'dropzone', 'password', 'modal', 'multi-select', 'confirmations'] as $demo) {
+                foreach (['markdown', 'dropzone', 'password', 'modal', 'multi-select', 'confirmations', 'utilities'] as $demo) {
                     Route::view($demo, 'admin.components.'.$demo)->name($demo);
                 }
             });
@@ -106,6 +108,25 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::put('/documents/{document:uuid}', [DocumentController::class, 'update'])->middleware('can:documents.update')->name('documents.update');
         Route::delete('/documents/{document:uuid}', [DocumentController::class, 'destroy'])->middleware('can:documents.delete')->name('documents.destroy');
 
+        Route::prefix('catalogs')->name('catalogs.')->scopeBindings()->group(function (): void {
+            Route::get('/', [CatalogController::class, 'index'])->name('index');
+            Route::get('/create', [CatalogController::class, 'create'])->name('create');
+            Route::post('/', [CatalogController::class, 'store'])->name('store');
+            Route::get('/{catalog}/edit', [CatalogController::class, 'edit'])->name('edit');
+            Route::put('/{catalog}', [CatalogController::class, 'update'])->name('update');
+            Route::patch('/{catalog}/status', [CatalogController::class, 'status'])->name('status');
+
+            Route::prefix('{catalog}/items')->name('items.')->group(function (): void {
+                Route::get('/', [CatalogItemController::class, 'index'])->name('index');
+                Route::get('/create', [CatalogItemController::class, 'create'])->name('create');
+                Route::post('/', [CatalogItemController::class, 'store'])->name('store');
+                Route::get('/{item}/edit', [CatalogItemController::class, 'edit'])->name('edit');
+                Route::put('/{item}', [CatalogItemController::class, 'update'])->name('update');
+                Route::patch('/{item}/status', [CatalogItemController::class, 'status'])->name('status');
+                Route::get('/{item}/image', [CatalogItemController::class, 'image'])->name('image');
+                Route::delete('/{item}/image', [CatalogItemController::class, 'deleteImage'])->name('image.delete');
+            });
+        });
         Route::get('/organizations', [OrganizationController::class, 'index'])->middleware('can:organizations.view')->name('organizations.index');
         Route::get('/organizations/create', [OrganizationController::class, 'create'])->middleware('can:organizations.create')->name('organizations.create');
         Route::post('/organizations', [OrganizationController::class, 'store'])->middleware('can:organizations.create')->name('organizations.store');

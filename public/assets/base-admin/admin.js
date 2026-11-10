@@ -344,3 +344,149 @@
         update();
     });
 })();
+(() => {
+    const stack = document.querySelector('[data-notify-stack]');
+    if (!stack) return;
+
+    const templates = new Map([...document.querySelectorAll('[data-notify-template]')]
+        .map(template => [template.dataset.notifyTemplate, template]));
+    const durations = { success: 3500, info: 4000, warning: 5500, error: 7000 };
+    const polite = document.querySelector('[data-notify-polite]');
+    const urgent = document.querySelector('[data-notify-urgent]');
+    const visible = new Map();
+
+    const show = ({ type = 'info', message } = {}) => {
+        if (typeof message !== 'string' || !message.trim()) return;
+        if (!templates.has(type)) type = 'info';
+        const key = JSON.stringify([type, message]);
+        if (visible.has(key)) return;
+        if (visible.size >= 3) visible.values().next().value(true);
+
+        const item = templates.get(type).content.firstElementChild.cloneNode(true);
+        item.querySelector('[data-notify-message]').textContent = message;
+        const origin = document.activeElement;
+        const announcer = type === 'error' ? urgent : polite;
+        let timer;
+        let exitTimer;
+        let remaining = durations[type];
+        let started;
+        const remove = () => {
+            clearTimeout(exitTimer);
+            item.remove();
+            visible.delete(key);
+        };
+        const dismiss = immediate => {
+            clearTimeout(timer);
+            if (item.contains(document.activeElement)) {
+                (origin && origin !== document.body && origin.isConnected ? origin : stack.closest('main'))
+                    ?.focus({ preventScroll: true });
+            }
+            if (immediate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                remove();
+            } else if (!item.classList.contains('is-leaving')) {
+                item.classList.add('is-leaving');
+                exitTimer = setTimeout(remove, 140);
+            }
+        };
+        const resume = () => {
+            if (timer !== undefined || item.matches(':hover, :focus-within, .is-leaving')) return;
+            started = performance.now();
+            timer = setTimeout(() => dismiss(false), remaining);
+        };
+        const pause = () => {
+            if (timer === undefined) return;
+            clearTimeout(timer);
+            timer = undefined;
+            remaining = Math.max(0, remaining - (performance.now() - started));
+        };
+
+        item.addEventListener('pointerenter', pause);
+        item.addEventListener('pointerleave', () => requestAnimationFrame(resume));
+        item.addEventListener('focusin', pause);
+        item.addEventListener('focusout', () => requestAnimationFrame(resume));
+        item.querySelector('[data-notify-close]').addEventListener('click', () => dismiss(false));
+        visible.set(key, dismiss);
+        stack.append(item);
+        announcer.replaceChildren(message);
+        resume();
+    };
+
+    window.AdminNotify = { show };
+    document.querySelectorAll('[data-notify-trigger]').forEach(button => {
+        button.addEventListener('click', () => show({
+            type: button.dataset.notifyTrigger,
+            message: button.dataset.notifyText,
+        }));
+    });
+    const flash = document.querySelector('[data-notify-flash]');
+    if (flash) {
+        show({ type: flash.dataset.notifyFlash, message: flash.querySelector('[data-notify-message]').textContent });
+        flash.remove();
+    }
+})();
+
+(() => {
+    document.querySelectorAll('[data-status-toggle]').forEach(form => {
+        const button = form.querySelector('[data-toggle-switch]');
+        const value = form.elements.namedItem('is_active');
+        const label = form.querySelector('[data-toggle-label]');
+        const feedback = form.querySelector('[data-toggle-feedback]');
+        const note = form.querySelector('[data-toggle-note]');
+        const demo = form.dataset.toggleDemo;
+        const token = form.elements.namedItem('_token');
+        if (!window.AdminNotify || (!demo && (!token || typeof fetch !== 'function'))) return;
+
+        const save = async event => {
+            event.preventDefault();
+            if (button.disabled) return;
+            const hadFocus = document.activeElement === button;
+            const next = value.value === '1';
+            button.disabled = true;
+            feedback.textContent = 'Guardando…';
+
+            try {
+                let result;
+                if (demo) {
+                    await new Promise(resolve => setTimeout(resolve, 650));
+                    result = { success: demo === 'success', is_active: next };
+                } else {
+                    const response = await fetch(form.action, {
+                        method: 'PATCH',
+                        credentials: 'same-origin',
+                        redirect: 'error',
+                        headers: {
+                            Accept: 'application/json',
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': token.value,
+                        },
+                        body: JSON.stringify({ is_active: next }),
+                    });
+                    if (!response.ok) throw new Error('No se pudo guardar el estado');
+                    result = await response.json();
+                }
+                if (result.success !== true || typeof result.is_active !== 'boolean') {
+                    throw new Error('Respuesta de estado inválida');
+                }
+
+                button.setAttribute('aria-checked', String(result.is_active));
+                label.textContent = result.is_active ? form.dataset.activeLabel : form.dataset.inactiveLabel;
+                value.value = result.is_active ? '0' : '1';
+                if (note) {
+                    note.hidden = !result.is_active;
+                    if (result.is_active) button.setAttribute('aria-describedby', note.id);
+                    else button.removeAttribute('aria-describedby');
+                }
+                window.AdminNotify.show({ type: 'success', message: 'Estado actualizado.' });
+            } catch {
+                window.AdminNotify.show({ type: 'error', message: 'No fue posible cambiar el estado.' });
+            } finally {
+                feedback.textContent = '';
+                button.disabled = false;
+                if (hadFocus && document.activeElement === document.body) button.focus({ preventScroll: true });
+            }
+        };
+
+        if (demo) button.addEventListener('click', save);
+        else form.addEventListener('submit', save);
+    });
+})();

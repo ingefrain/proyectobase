@@ -4,10 +4,14 @@ namespace App\Providers;
 
 use App\Contracts\OutboxEmailSender;
 use App\Mail\LaravelOutboxEmailSender;
+use App\Models\Catalog;
+use App\Models\CatalogItem;
 use App\Models\Document;
 use App\Models\Location;
 use App\Models\Organization;
 use App\Models\User;
+use App\Policies\CatalogItemPolicy;
+use App\Policies\CatalogPolicy;
 use App\Policies\DocumentPolicy;
 use App\Policies\LocationPolicy;
 use App\Policies\OrganizationPolicy;
@@ -33,6 +37,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Document::class, DocumentPolicy::class);
+        Gate::policy(Catalog::class, CatalogPolicy::class);
+        Gate::policy(CatalogItem::class, CatalogItemPolicy::class);
         Gate::policy(Organization::class, OrganizationPolicy::class);
         Gate::policy(Location::class, LocationPolicy::class);
 

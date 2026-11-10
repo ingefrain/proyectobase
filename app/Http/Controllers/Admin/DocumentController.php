@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CatalogItem;
 use App\Models\Document;
 use App\Models\Location;
 use App\Models\Organization;
@@ -69,7 +70,7 @@ class DocumentController extends Controller
     {
         $validated = $request->validate([
             'file' => ['required', 'file'],
-            'category' => ['required', 'string', 'max:100'],
+            'category' => ['required', 'string', 'max:100', Rule::notIn([CatalogItem::IMAGE_CATEGORY])],
             'title' => ['nullable', 'string', 'max:200'],
             'description' => ['nullable', 'string', 'max:4000'],
         ]);
@@ -88,7 +89,7 @@ class DocumentController extends Controller
     {
         Gate::authorize('update', $document);
         $validated = $request->validate([
-            'category' => ['required', 'string', 'max:100'],
+            'category' => ['required', 'string', 'max:100', Rule::notIn([CatalogItem::IMAGE_CATEGORY])],
             'title' => ['nullable', 'string', 'max:200'],
             'description' => ['nullable', 'string', 'max:4000'],
             'file' => ['nullable', 'file'],

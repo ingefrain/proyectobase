@@ -26,8 +26,8 @@
                 @if($navigationCan('dashboard.view'))
                     <a class="side-link {{ request()->routeIs('admin.dashboard') ? 'is-active' : '' }}" href="{{ route('admin.dashboard') }}" @if(request()->routeIs('admin.dashboard')) aria-current="page" @endif>Resumen</a>
                 @endif
-                @if($navigationCan('users.view') || $navigationCan('roles.view') || $navigationCan('notifications.view') || $navigationCan('documents.view') || $navigationCan('system.audit.view'))
-                    <a class="side-link {{ request()->routeIs('admin.settings.*', 'admin.users.*', 'admin.roles.*', 'admin.system-audit.*', 'admin.system-status.*', 'admin.login-security.*', 'admin.permissions.*', 'admin.audit.*', 'admin.notifications.*', 'admin.documents.*') ? 'is-active' : '' }}" href="{{ route('admin.settings.index') }}" @if(request()->routeIs('admin.settings.*', 'admin.users.*', 'admin.roles.*', 'admin.system-audit.*', 'admin.system-status.*', 'admin.login-security.*', 'admin.permissions.*', 'admin.audit.*', 'admin.notifications.*', 'admin.documents.*')) aria-current="page" @endif>Configuración</a>
+                @if($navigationCan('users.view') || $navigationCan('roles.view') || $navigationCan('notifications.view') || $navigationCan('documents.view') || $navigationCan('system.audit.view') || auth()->user()?->can('viewAny', \App\Models\Catalog::class))
+                    <a class="side-link {{ request()->routeIs('admin.settings.*', 'admin.users.*', 'admin.roles.*', 'admin.system-audit.*', 'admin.system-status.*', 'admin.login-security.*', 'admin.permissions.*', 'admin.audit.*', 'admin.notifications.*', 'admin.documents.*', 'admin.catalogs.*') ? 'is-active' : '' }}" href="{{ route('admin.settings.index') }}" @if(request()->routeIs('admin.settings.*', 'admin.users.*', 'admin.roles.*', 'admin.system-audit.*', 'admin.system-status.*', 'admin.login-security.*', 'admin.permissions.*', 'admin.audit.*', 'admin.notifications.*', 'admin.documents.*', 'admin.catalogs.*')) aria-current="page" @endif>Configuración</a>
                 @endif
                 @if($navigationCan('reports.view') && (!$impersonation->active() || $impersonation->actor()?->hasPermissionTo('reports.view')))
                     <a class="side-link {{ request()->routeIs('admin.reports.*') ? 'is-active' : '' }}" href="{{ route('admin.reports.index') }}" @if(request()->routeIs('admin.reports.*')) aria-current="page" @endif>Reportes</a>
@@ -75,6 +75,7 @@
             </header>
 
             <main class="main-content" id="main-content" tabindex="-1">
+                <x-admin.notify />
                 @foreach (['status' => 'success', 'success' => 'success', 'error' => 'error', 'warning' => 'warning', 'info' => 'info'] as $key => $variant)
                     @if (session($key))
                         <x-admin.alert :variant="$variant">{{ session($key) }}</x-admin.alert>

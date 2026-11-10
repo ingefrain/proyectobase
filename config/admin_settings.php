@@ -3,6 +3,13 @@
 return [
     'cards' => [
         [
+            'title' => 'Catálogos',
+            'description' => 'Gestiona conjuntos reutilizables de elementos administrables.',
+            'action' => 'Administrar catálogos',
+            'route' => 'admin.catalogs.index',
+            'permission' => 'catalogs.view',
+        ],
+        [
             'title' => 'Usuarios',
             'description' => 'Gestiona las personas con acceso al sistema.',
             'action' => 'Entrar a administración de usuarios',

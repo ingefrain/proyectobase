@@ -36,7 +36,7 @@ class ComponentCatalogTest extends TestCase
 
     public function test_catalog_requires_login_and_technical_permission(): void
     {
-        foreach (['index', 'markdown', 'dropzone', 'password', 'modal', 'multi-select', 'confirmations'] as $demo) {
+        foreach (['index', 'markdown', 'dropzone', 'password', 'modal', 'multi-select', 'confirmations', 'utilities'] as $demo) {
             $this->get(route('admin.components.'.$demo))->assertRedirect(route('admin.login'));
         }
         $user = User::factory()->create(['is_active' => true]);
@@ -55,6 +55,29 @@ class ComponentCatalogTest extends TestCase
         $this->app->instance('env', 'production');
         $this->get(route('admin.dashboard'))->assertDontSee(route('admin.components.index'));
         $this->get(route('admin.components.password'))->assertNotFound();
+    }
+
+    public function test_utilities_groups_the_toggle_and_notify_and_retires_the_old_route(): void
+    {
+        $this->actingAsAdmin();
+        $this->get(route('admin.components.index'))->assertOk()->assertSee('Utilidades')->assertDontSee('Toggle de estado');
+        $page = $this->get(route('admin.components.utilities'))->assertOk()->assertSee('Toggle de estado')->assertSee('Notificaciones');
+        foreach (['success', 'info', 'warning', 'error'] as $type) {
+            $page->assertSee('data-notify-trigger="'.$type.'"', false)
+                ->assertSee('data-notify-template="'.$type.'"', false);
+        }
+        $this->get('/admin/components/status-toggle')->assertNotFound();
+    }
+
+    public function test_flash_notify_escapes_text_and_falls_back_to_info_for_an_invalid_type(): void
+    {
+        $this->actingAsAdmin();
+        $message = '<img src=x onerror=alert(1)>';
+        $this->withSession(['notify' => ['type' => 'unknown', 'message' => $message]])
+            ->get(route('admin.components.utilities'))->assertOk()
+            ->assertSee('data-notify-flash="info"', false)
+            ->assertSee($message)
+            ->assertDontSee($message, false);
     }
 
     public function test_demos_render_existing_controls_without_write_routes_or_fixtures(): void
