@@ -43,9 +43,8 @@
     document.documentElement.classList.add('js-enabled');
 
     const openModal = (dialog, opener = null) => {
-        if (!dialog) return;
+        if (!dialog || dialog.open) return;
         dialog._focusReturn = opener || document.activeElement;
-        if (dialog.open) dialog.removeAttribute('open');
         if (typeof dialog.showModal === 'function') dialog.showModal();
         else dialog.setAttribute('open', '');
         dialog.querySelector('[data-modal-initial-focus]')?.focus({ preventScroll: true });
@@ -63,6 +62,54 @@
             dialog._focusReturn = null;
         });
         if (dialog.hasAttribute('data-open-on-load')) openModal(dialog, null);
+    });
+
+    document.querySelectorAll('[data-confirm-dialog]').forEach(dialog => {
+        // Without native modal support, leave the original form usable.
+        if (typeof dialog.showModal !== 'function') return;
+        const form = dialog.closest('form');
+        const accept = dialog.querySelector('[data-confirm-accept]');
+        const phrase = dialog.querySelector('[data-confirm-phrase]');
+        let submitter;
+        let confirmed = false;
+
+        phrase?.addEventListener('input', () => {
+            accept.disabled = phrase.value !== phrase.dataset.confirmPhrase;
+        });
+        dialog.addEventListener('close', () => {
+            if (dialog.open) return;
+            submitter = undefined;
+            if (phrase) {
+                phrase.value = '';
+                accept.disabled = true;
+            }
+        });
+        form?.addEventListener('submit', event => {
+            if (confirmed || event.defaultPrevented) return;
+            event.preventDefault();
+            if (dialog.open) return;
+            submitter = event.submitter;
+            openModal(dialog, submitter);
+        });
+        dialog.addEventListener('keydown', event => {
+            if (event.key !== 'Tab') return;
+            const controls = [...dialog.querySelectorAll('button:not(:disabled), input:not(:disabled)')];
+            const edge = event.shiftKey ? controls[0] : controls.at(-1);
+            if (document.activeElement !== edge) return;
+            event.preventDefault();
+            (event.shiftKey ? controls.at(-1) : controls[0]).focus();
+        });
+        accept.addEventListener('click', () => {
+            if (!dialog.open || (phrase && phrase.value !== phrase.dataset.confirmPhrase)) return;
+            dialog.close();
+            if (!form) return;
+            confirmed = true;
+            try {
+                form.requestSubmit(submitter ?? undefined);
+            } finally {
+                confirmed = false;
+            }
+        });
     });
 
     document.querySelectorAll('[data-role-selector]').forEach(selector => {

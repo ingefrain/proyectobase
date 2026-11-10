@@ -191,6 +191,9 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--teal); }
 .alert-success { border-color: #b8ddc9; color: #245b42; background: #eaf7ef; }
 .alert-error { border-color: #e6c0bd; color: #842e2b; background: #fff0ee; }
 .alert-warning { border-color: #ead7a7; color: #70551b; background: #fff8e5; }
+.alert:has(>.alert-icon) { display:flex;align-items:flex-start;gap:9px;overflow-wrap:anywhere; }
+.alert-icon { display: grid; place-items: center; flex: none; width: 1.3em; height: 1lh; }
+.alert-icon > span { display: grid; place-items: center; width: 1.3em; height: 1.3em; border: 1px solid currentColor; border-radius: 50%; font-weight: 700; line-height: 1; }
 
 .guest-body { display: grid; min-height: 100vh; padding: 24px; place-items: center; background: radial-gradient(ellipse at 15% 5%, #e3f1f1, transparent 45%), var(--canvas); }
 .guest-card { width: min(100%, 450px); padding: clamp(24px, 5vw, 42px); border: 1px solid var(--line); border-radius: 18px; background: white; box-shadow: 0 20px 60px rgb(20 47 64 / 9%); }
@@ -294,6 +297,14 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--teal); }
 .password-limit-warning{grid-column:1/-1;margin:-6px 0 0;color:var(--danger);font-size:.87rem;font-weight:650}
 .password-limit-warning[hidden]{display:none}
 .profile-modal-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:9px;margin-top:22px;padding-top:17px;border-top:1px solid var(--line)}
+.confirm-dialog{width:min(520px,calc(100% - 28px));overflow-wrap:anywhere}
+.confirm-kind{display:flex;align-items:center;gap:7px}
+.confirm-kind span{display:inline-grid;place-items:center;width:1.4rem;height:1.4rem;border:1px solid currentColor;border-radius:50%}
+.confirm-dialog[data-variant="warning"] .confirm-kind{color:#70551b}
+.confirm-dialog:is([data-variant="danger"],[data-variant="danger-confirm"]) .confirm-kind{color:#8f3131}
+.confirm-dialog .button:disabled{opacity:.55;cursor:not-allowed}
+.confirm-demo-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+@media(max-width:520px){.confirm-dialog .profile-modal-actions>.button{width:100%;white-space:normal}}
 @media(max-width:850px){.profile-grid{grid-template-columns:1fr}}
 @media(max-width:620px){.profile-security{align-items:flex-start;flex-direction:column}.profile-security>.button{width:100%}.profile-modal{padding:19px}.password-fields{grid-template-columns:1fr;gap:12px}.password-checklist,.password-limit-warning{grid-column:1}}
 .profile-modal .password-checklist{grid-template-columns:1fr;gap:8px}

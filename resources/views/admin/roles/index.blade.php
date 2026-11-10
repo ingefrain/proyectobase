@@ -19,7 +19,13 @@
                         <td class="row-actions">
                             @can('roles.update')<a class="button button-secondary button-small" href="{{ route('admin.roles.edit', $role) }}">Editar</a>@endcan
                             @can('roles.update')
-                                <form method="POST" action="{{ route('admin.roles.status', $role) }}">@csrf @method('PATCH')<button class="button {{ $role->is_active ? 'button-danger' : 'button-secondary' }} button-small" type="submit">{{ $role->is_active ? 'Desactivar' : 'Activar' }}</button></form>
+                                <form method="POST" action="{{ route('admin.roles.status', $role) }}">@csrf @method('PATCH')
+                                    @if($role->is_active)
+                                        <x-admin.confirm-dialog title="Desactivar rol" variant="warning" confirm-label="Desactivar rol"
+                                            :message="'¿Deseas desactivar el rol «'.$role->name.'»?'"
+                                            consequence="El rol dejará de otorgar permisos y se invalidarán las sesiones de los usuarios asignados. Sus asignaciones se conservarán." />
+                                    @endif
+                                    <button class="button {{ $role->is_active ? 'button-danger' : 'button-secondary' }} button-small" type="submit">{{ $role->is_active ? 'Desactivar' : 'Activar' }}</button></form>
                             @endcan
                         </td>
                     </tr>

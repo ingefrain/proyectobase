@@ -29,6 +29,9 @@
                 @if($navigationCan('users.view') || $navigationCan('roles.view') || $navigationCan('notifications.view') || $navigationCan('documents.view') || $navigationCan('system.audit.view'))
                     <a class="side-link {{ request()->routeIs('admin.settings.*', 'admin.users.*', 'admin.roles.*', 'admin.system-audit.*', 'admin.system-status.*', 'admin.login-security.*', 'admin.permissions.*', 'admin.audit.*', 'admin.notifications.*', 'admin.documents.*') ? 'is-active' : '' }}" href="{{ route('admin.settings.index') }}" @if(request()->routeIs('admin.settings.*', 'admin.users.*', 'admin.roles.*', 'admin.system-audit.*', 'admin.system-status.*', 'admin.login-security.*', 'admin.permissions.*', 'admin.audit.*', 'admin.notifications.*', 'admin.documents.*')) aria-current="page" @endif>Configuración</a>
                 @endif
+                @if(app()->environment('local') && config('admin_components.enabled') && $navigationCan('system.audit.view'))
+                    <a class="side-link {{ request()->routeIs('admin.components.*') ? 'is-active' : '' }}" href="{{ route('admin.components.index') }}" @if(request()->routeIs('admin.components.*')) aria-current="page" @endif>Componentes</a>
+                @endif
             </nav>
         </aside>
 

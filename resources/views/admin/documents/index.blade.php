@@ -59,8 +59,11 @@
                                 </details>
                             @endcan
                             @can('delete', $document)
-                                <form method="POST" action="{{ route('admin.documents.destroy', $document) }}" onsubmit="return confirm('¿Marcar este documento para eliminación? El archivo se conservará durante el periodo de retención.');">
+                                <form method="POST" action="{{ route('admin.documents.destroy', $document) }}">
                                     @csrf @method('DELETE')
+                                    <x-admin.confirm-dialog title="Eliminar documento" variant="danger"
+                                        :message="'¿Deseas marcar para eliminación «'.($document->title ?: $document->safeOriginalName()).'»?'"
+                                        consequence="El documento dejará de estar disponible. El archivo se conservará durante el periodo de retención antes de su purga." />
                                     <button class="button button-danger button-small" type="submit">Eliminar</button>
                                 </form>
                             @endcan

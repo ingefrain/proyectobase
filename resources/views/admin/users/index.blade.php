@@ -46,8 +46,13 @@
                         <td class="row-actions" data-label="Acciones">
                             @can('users.impersonate')
                                 @if(!app(\App\Support\ImpersonationManager::class)->active() && (int) $user->id !== (int) auth()->id())
-                                    <form method="POST" action="{{ route('admin.users.impersonate', $user) }}" onsubmit="return confirm(@js('¿Deseas iniciar sesión como '.$user->name.' ('.$user->email.')?'.($user->is_active ? '' : ' La cuenta está inactiva y seguirá inactiva.').' Podrás volver a tu sesión administrativa en cualquier momento. La acción quedará registrada en auditoría.'))">
+                                    <form method="POST" action="{{ route('admin.users.impersonate', $user) }}"">
                                         @csrf
+                                        <x-admin.confirm-dialog
+                                            title="Ver como usuario" variant="info" confirm-label="Iniciar impersonación"
+                                            :message="$user->name.' ('.$user->email.') · '.($user->is_active ? 'Activo' : 'Inactivo').' · '.($user->roles->pluck('name')->implode(', ') ?: 'Sin rol')"
+                                            consequence="Navegarás temporalmente como este usuario. Podrás regresar a tu sesión administrativa en cualquier momento. La acción quedará registrada en auditoría."
+                                        />
                                         <button class="button button-secondary button-small" type="submit" aria-label="Impersonar a {{ $user->name }}">Ver como usuario</button>
                                     </form>
                                 @endif
@@ -56,6 +61,11 @@
                             @can('users.disable')
                                 <form method="POST" action="{{ route('admin.users.status', $user) }}">
                                     @csrf @method('PATCH')
+                                    @if($user->is_active)
+                                        <x-admin.confirm-dialog title="Desactivar usuario" variant="warning" confirm-label="Desactivar usuario"
+                                            :message="'¿Deseas desactivar a '.$user->name.'?'"
+                                            consequence="El usuario dejará de poder iniciar sesión y sus sesiones activas se invalidarán. Sus datos se conservarán y podrás volver a activarlo." />
+                                    @endif
                                     <button class="button {{ $user->is_active ? 'button-danger' : 'button-secondary' }} button-small" type="submit">{{ $user->is_active ? 'Desactivar' : 'Activar' }}</button>
                                 </form>
                             @endcan

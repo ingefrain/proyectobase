@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\SystemAuditController;
 use App\Http\Controllers\Admin\SystemStatusController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Middleware\EnsureComponentCatalogEnabled;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route('admin.login'));
@@ -40,6 +41,14 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
 
     Route::middleware(['auth', 'impersonation', 'account.active', 'session.current'])->group(function (): void {
         Route::post('/markdown/preview', MarkdownPreviewController::class)->name('markdown.preview');
+        Route::prefix('components')->name('components.')
+            ->middleware([EnsureComponentCatalogEnabled::class, 'can:system.audit.view'])
+            ->group(function (): void {
+                Route::view('/', 'admin.components.index')->name('index');
+                foreach (['markdown', 'dropzone', 'password', 'modal', 'multi-select', 'confirmations'] as $demo) {
+                    Route::view($demo, 'admin.components.'.$demo)->name($demo);
+                }
+            });
         Route::get('/', DashboardController::class)->middleware('can:dashboard.view')->name('dashboard');
         Route::get('/settings', SettingsController::class)->name('settings.index');
         Route::get('/system-audit', SystemAuditController::class)->middleware('can:system.audit.view')->name('system-audit.index');

@@ -44,6 +44,11 @@ class OrganizationsAndLocationsTest extends TestCase
         $this->assertDatabaseHas('admin_audit_events', ['action' => 'organization.updated', 'actor_id' => $admin->id]);
 
         $location = Location::query()->create(['organization_id' => $organization->id, 'name' => 'Plantel Centro']);
+        $this->get(route('admin.organizations.index'))->assertOk()
+            ->assertSee('action="'.route('admin.organizations.status', $organization).'"', false)
+            ->assertSee('Desactivar organización')
+            ->assertSee('El estado individual de cada sede se conservará.');
+        $this->assertTrue($organization->fresh()->is_active);
         $this->patch(route('admin.organizations.status', $organization))->assertRedirect();
         $this->assertFalse($organization->fresh()->is_active);
         $this->assertTrue($location->fresh()->is_active);

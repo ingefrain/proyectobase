@@ -16,7 +16,13 @@
             <div class="table-wrap"><table><thead><tr><th>Organización</th><th>Sedes</th><th>Creada</th><th>Estado</th><th><span class="sr-only">Acciones</span></th></tr></thead><tbody>
             @foreach($organizations as $organization)
                 <tr><td><strong>{{ $organization->name }}</strong>@if($organization->legal_name)<small class="table-subtitle">{{ $organization->legal_name }}</small>@endif</td><td>@can('locations.view')<a href="{{ route('admin.locations.index', ['organization' => $organization->uuid]) }}">{{ $organization->locations_count }}</a>@else{{ $organization->locations_count }}@endcan</td><td><time datetime="{{ $organization->created_at->toIso8601String() }}">{{ $organization->created_at->format('d/m/Y') }}</time></td><td><span class="badge {{ $organization->is_active ? 'badge-success' : 'badge-muted' }}">{{ $organization->is_active ? 'Activa' : 'Inactiva' }}</span></td>
-                    <td class="row-actions">@can('organizations.update')<a class="button button-secondary button-small" href="{{ route('admin.organizations.edit', $organization) }}">Editar</a>@endcan @can('organizations.disable')<form method="POST" action="{{ route('admin.organizations.status', $organization) }}">@csrf @method('PATCH')<button class="button {{ $organization->is_active ? 'button-danger' : 'button-secondary' }} button-small" type="submit">{{ $organization->is_active ? 'Desactivar' : 'Activar' }}</button></form>@endcan</td></tr>
+                    <td class="row-actions">@can('organizations.update')<a class="button button-secondary button-small" href="{{ route('admin.organizations.edit', $organization) }}">Editar</a>@endcan @can('organizations.disable')<form method="POST" action="{{ route('admin.organizations.status', $organization) }}">@csrf @method('PATCH')
+                                    @if($organization->is_active)
+                                        <x-admin.confirm-dialog title="Desactivar organización" variant="warning" confirm-label="Desactivar organización"
+                                            :message="'¿Deseas desactivar la organización «'.$organization->name.'»?'"
+                                            consequence="Sus sedes dejarán de estar operativamente activas. El estado individual de cada sede se conservará." />
+                                    @endif
+                                    <button class="button {{ $organization->is_active ? 'button-danger' : 'button-secondary' }} button-small" type="submit">{{ $organization->is_active ? 'Desactivar' : 'Activar' }}</button></form>@endcan</td></tr>
             @endforeach
             </tbody></table></div><div class="pagination-wrap">{{ $organizations->links() }}</div>
         @endif

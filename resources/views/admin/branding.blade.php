@@ -20,7 +20,11 @@
             <button class="button button-primary" type="submit">Guardar cambios</button>
         </form>
         @if($branding->logo)
-            <form method="POST" action="{{ route('admin.branding.logo.delete') }}" class="form-actions" onsubmit="return confirm('¿Eliminar el logotipo actual?');">@csrf @method('DELETE')<button class="button button-danger" type="submit">Eliminar logotipo</button></form>
+            <form method="POST" action="{{ route('admin.branding.logo.delete') }}" class="form-actions">@csrf @method('DELETE')
+                <x-admin.confirm-dialog title="Eliminar logotipo" variant="danger"
+                    message="¿Deseas retirar el logotipo actual?"
+                    consequence="El panel dejará de mostrar este logotipo. El archivo se conservará durante el periodo de retención." />
+                <button class="button button-danger" type="submit">Eliminar logotipo</button></form>
         @endif
     </section>
 @endsection
