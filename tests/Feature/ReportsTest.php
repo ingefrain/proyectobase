@@ -96,14 +96,14 @@ class ReportsTest extends TestCase
     {
         $actor = $this->adminUser();
         $this->actingAsAdmin($actor);
-        $org = Organization::create([
+        $org = Organization::factory()->create([
             'name' => '@Cantares', 'legal_name' => 'Fundación Águila', 'slug' => 'cantares',
             'phone' => '+525512345678', 'tax_id' => 'DATO-FISCAL-PRIVADO',
         ]);
         $org->forceFill(['created_at' => '2026-10-05 14:30:00'])->save();
-        Location::create(['organization_id' => $org->id, 'name' => 'Norte']);
-        Location::create(['organization_id' => $org->id, 'name' => 'Sur']);
-        Organization::create(['name' => 'Águila sin sedes', 'slug' => 'sin-sedes', 'is_active' => false]);
+        Location::factory()->for($org)->create(['name' => 'Norte']);
+        Location::factory()->for($org)->create(['name' => 'Sur']);
+        Organization::factory()->create(['name' => 'Águila sin sedes', 'slug' => 'sin-sedes', 'is_active' => false]);
 
         $filters = ['q' => 'Águila', 'status' => 'active', 'locations' => 'with', 'to' => '2026-10-05'];
         $this->get(route('admin.reports.organizations', $filters))->assertOk()->assertSee('1 resultado')

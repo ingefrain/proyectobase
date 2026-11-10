@@ -430,7 +430,6 @@
         const button = form.querySelector('[data-toggle-switch]');
         const value = form.elements.namedItem('is_active');
         const label = form.querySelector('[data-toggle-label]');
-        const feedback = form.querySelector('[data-toggle-feedback]');
         const note = form.querySelector('[data-toggle-note]');
         const demo = form.dataset.toggleDemo;
         const token = form.elements.namedItem('_token');
@@ -442,7 +441,7 @@
             const hadFocus = document.activeElement === button;
             const next = value.value === '1';
             button.disabled = true;
-            feedback.textContent = 'Guardando…';
+            button.setAttribute('aria-busy', 'true');
 
             try {
                 let result;
@@ -480,7 +479,7 @@
             } catch {
                 window.AdminNotify.show({ type: 'error', message: 'No fue posible cambiar el estado.' });
             } finally {
-                feedback.textContent = '';
+                button.removeAttribute('aria-busy');
                 button.disabled = false;
                 if (hadFocus && document.activeElement === document.body) button.focus({ preventScroll: true });
             }

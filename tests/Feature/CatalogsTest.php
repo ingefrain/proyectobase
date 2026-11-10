@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\AdminAuditEvent;
 use App\Models\Catalog;
+use App\Models\CatalogItem;
 use App\Models\Document;
 use App\Models\Organization;
 use App\Services\Documents\DocumentOwnerAccess;
@@ -24,7 +25,7 @@ class CatalogsTest extends TestCase
     public function test_catalog_create_edit_filters_scope_and_operational_state(): void
     {
         $this->actingAsAdmin();
-        $org = Organization::create(['name' => 'Organización Norte', 'slug' => 'org-norte', 'is_active' => false]);
+        $org = Organization::factory()->inactive()->create(['name' => 'Organización Norte', 'slug' => 'org-norte']);
         $this->get(route('admin.settings.index'))->assertOk()->assertSee('Administrar catálogos');
         $this->get(route('admin.catalogs.create'))->assertOk()->assertSee('data-markdown-preview', false);
         $this->post(route('admin.catalogs.store'), [
@@ -41,7 +42,7 @@ class CatalogsTest extends TestCase
         $this->get(route('admin.catalogs.edit', $catalog->id))->assertNotFound();
         $this->post(route('admin.catalogs.store'), ['name' => 'Otro', 'slug' => $catalog->slug, 'is_active' => 1])->assertSessionHasErrors('slug');
 
-        $item = $catalog->items()->create(['name' => 'Elemento', 'slug' => 'elemento', 'is_active' => true]);
+        $item = CatalogItem::factory()->for($catalog)->create(['name' => 'Elemento', 'slug' => 'elemento', 'is_active' => true]);
         $this->get(route('admin.catalogs.index', ['q' => 'Servicios', 'status' => 'active', 'organization' => $org->uuid]))
             ->assertOk()->assertSee('Inactivo por organización')->assertSee('Servicios únicos')->assertSee('<td>1</td>', false);
         $this->get(route('admin.catalogs.index', ['status' => 'inactive']))->assertOk()->assertDontSee('Servicios únicos');
@@ -81,7 +82,7 @@ class CatalogsTest extends TestCase
         $this->get(route('admin.catalogs.items.index', $catalog).'?q=A-1&status=active')->assertOk()->assertSee('Clases')->assertDontSee('Otro');
         $this->get(route('admin.catalogs.items.index', $catalog))->assertOk()->assertSeeInOrder(['Clases', 'Otro']);
         foreach (range(1, 15) as $i) {
-            $catalog->items()->create(['name' => 'Fila '.$i, 'slug' => 'fila-'.$i]);
+            CatalogItem::factory()->for($catalog)->create(['name' => 'Fila '.$i, 'slug' => 'fila-'.$i]);
         }
         $this->get(route('admin.catalogs.items.index', $catalog).'?q=Fila&status=active')->assertOk()->assertSee('Fila 15');
         $this->get(route('admin.catalogs.items.index', $catalog).'?status=active')->assertOk()->assertSee('status=active&amp;page=2', false);
@@ -104,7 +105,7 @@ class CatalogsTest extends TestCase
         $admin = $this->adminUser();
         $this->actingAsAdmin($admin);
         $catalog = $this->catalog('imagen');
-        $org = Organization::create(['name' => 'Sede privada', 'slug' => 'sede-privada']);
+        $org = Organization::factory()->create(['name' => 'Sede privada', 'slug' => 'sede-privada']);
         $catalog->update(['organization_id' => $org->id]);
         $this->post(route('admin.catalogs.items.store', $catalog), [
             'name' => 'Con imagen', 'is_active' => 1, 'image' => UploadedFile::fake()->image('principal.png', 40, 40),
@@ -168,7 +169,7 @@ class CatalogsTest extends TestCase
     {
         $admin = $this->adminUser();
         $catalog = $this->catalog('toggle');
-        $item = $catalog->items()->create(['name' => 'Elemento', 'slug' => 'elemento', 'is_active' => true]);
+        $item = CatalogItem::factory()->for($catalog)->create(['name' => 'Elemento', 'slug' => 'elemento', 'is_active' => true]);
         $catalogUrl = route('admin.catalogs.status', $catalog);
         $itemUrl = route('admin.catalogs.items.status', [$catalog, $item]);
         $this->actingAsAdmin($this->userWithRole('operator'))->patchJson($catalogUrl, ['is_active' => false])->assertForbidden();
@@ -215,6 +216,6 @@ class CatalogsTest extends TestCase
 
     private function catalog(string $slug): Catalog
     {
-        return Catalog::create(['name' => ucfirst($slug), 'slug' => $slug, 'is_active' => true]);
+        return Catalog::factory()->create(['name' => ucfirst($slug), 'slug' => $slug, 'is_active' => true]);
     }
 }

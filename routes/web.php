@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\CatalogItemController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\ImpersonationController;
+use App\Http\Controllers\Admin\ImportController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\LoginSecurityController;
 use App\Http\Controllers\Admin\MarkdownPreviewController;
@@ -61,6 +62,15 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             });
         Route::get('/', DashboardController::class)->middleware('can:dashboard.view')->name('dashboard');
         Route::get('/settings', SettingsController::class)->name('settings.index');
+        Route::prefix('imports')->name('imports.')->controller(ImportController::class)->group(function (): void {
+            Route::get('/', 'index')->name('index');
+            Route::get('/new/{type}', 'create')->name('create');
+            Route::get('/template/{type}', 'template')->name('template');
+            Route::post('/new/{type}', 'store')->name('store');
+            Route::get('/{run}', 'show')->whereUuid('run')->name('show');
+            Route::delete('/{run}', 'destroy')->whereUuid('run')->name('destroy');
+            Route::post('/{run}/apply', 'apply')->whereUuid('run')->name('apply');
+        });
         Route::get('/system-audit', SystemAuditController::class)->middleware('can:system.audit.view')->name('system-audit.index');
         Route::get('/system-status', SystemStatusController::class)->middleware('can:system.audit.view')->name('system-status.index');
         Route::get('/system-audit/login-security', LoginSecurityController::class)

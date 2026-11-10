@@ -15,6 +15,7 @@
     @php($impersonation = app(\App\Support\ImpersonationManager::class))
     @php($navigationUser = $impersonation->effectiveUser())
     @php($navigationCan = fn (string $permission): bool => $impersonation->active() ? (bool) $navigationUser?->hasPermissionTo($permission) : (bool) $navigationUser?->can($permission))
+    @php($navigationImports = $navigationUser && app(\App\Imports\ImportAccess::class)->allows($navigationUser, 'imports.view'))
     <div class="admin-shell">
         <button class="drawer-scrim" type="button" data-drawer-close aria-label="Cerrar menú" tabindex="-1"></button>
         <aside class="sidebar" id="admin-sidebar" aria-label="Navegación administrativa">
@@ -26,8 +27,9 @@
                 @if($navigationCan('dashboard.view'))
                     <a class="side-link {{ request()->routeIs('admin.dashboard') ? 'is-active' : '' }}" href="{{ route('admin.dashboard') }}" @if(request()->routeIs('admin.dashboard')) aria-current="page" @endif>Resumen</a>
                 @endif
-                @if($navigationCan('users.view') || $navigationCan('roles.view') || $navigationCan('notifications.view') || $navigationCan('documents.view') || $navigationCan('system.audit.view') || auth()->user()?->can('viewAny', \App\Models\Catalog::class))
-                    <a class="side-link {{ request()->routeIs('admin.settings.*', 'admin.users.*', 'admin.roles.*', 'admin.system-audit.*', 'admin.system-status.*', 'admin.login-security.*', 'admin.permissions.*', 'admin.audit.*', 'admin.notifications.*', 'admin.documents.*', 'admin.catalogs.*') ? 'is-active' : '' }}" href="{{ route('admin.settings.index') }}" @if(request()->routeIs('admin.settings.*', 'admin.users.*', 'admin.roles.*', 'admin.system-audit.*', 'admin.system-status.*', 'admin.login-security.*', 'admin.permissions.*', 'admin.audit.*', 'admin.notifications.*', 'admin.documents.*', 'admin.catalogs.*')) aria-current="page" @endif>Configuración</a>
+                @if($navigationImports || $navigationCan('users.view') || $navigationCan('roles.view') || $navigationCan('notifications.view') || $navigationCan('documents.view') || $navigationCan('system.audit.view') || auth()->user()?->can('viewAny', \App\Models\Catalog::class))
+                    @php($settingsActive = request()->routeIs('admin.settings.*', 'admin.imports.*', 'admin.users.*', 'admin.roles.*', 'admin.system-audit.*', 'admin.system-status.*', 'admin.login-security.*', 'admin.permissions.*', 'admin.audit.*', 'admin.notifications.*', 'admin.documents.*', 'admin.catalogs.*'))
+                    <a class="side-link {{ $settingsActive ? 'is-active' : '' }}" href="{{ route('admin.settings.index') }}" @if($settingsActive) aria-current="page" @endif>Configuración</a>
                 @endif
                 @if($navigationCan('reports.view') && (!$impersonation->active() || $impersonation->actor()?->hasPermissionTo('reports.view')))
                     <a class="side-link {{ request()->routeIs('admin.reports.*') ? 'is-active' : '' }}" href="{{ route('admin.reports.index') }}" @if(request()->routeIs('admin.reports.*')) aria-current="page" @endif>Reportes</a>

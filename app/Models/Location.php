@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -9,6 +10,8 @@ use Illuminate\Support\Str;
 
 class Location extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'uuid', 'organization_id', 'name', 'code', 'email', 'phone', 'address_line_1', 'address_line_2',
         'city', 'state', 'postal_code', 'country_code', 'latitude', 'longitude', 'is_active',

@@ -64,6 +64,7 @@ class ComponentCatalogTest extends TestCase
         $this->actingAsAdmin();
         $this->get(route('admin.components.index'))->assertOk()->assertSee('Utilidades')->assertDontSee('Toggle de estado');
         $page = $this->get(route('admin.components.utilities'))->assertOk()->assertSee('Toggle de estado')->assertSee('Notificaciones');
+        $page->assertSee('aria-busy="true"', false)->assertDontSee('data-toggle-feedback', false)->assertDontSee('Guardando…');
         foreach (['success', 'info', 'warning', 'error'] as $type) {
             $page->assertSee('data-notify-trigger="'.$type.'"', false)
                 ->assertSee('data-notify-template="'.$type.'"', false);

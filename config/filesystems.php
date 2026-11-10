@@ -29,6 +29,12 @@ return [
     */
 
     'disks' => [
+        'import_sources' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/import-sources'),
+            'visibility' => 'private',
+            'throw' => false,
+        ],
 
         'local' => [
             'driver' => 'local',

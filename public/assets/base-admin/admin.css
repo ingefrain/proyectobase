@@ -166,11 +166,11 @@ td .table-subtitle { display: block; max-width: 280px; margin-top: 3px; overflow
 .admin-toggle-button { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 3px; border: 0; border-radius: 8px; color: var(--ink); background: transparent; cursor: pointer; font-weight: 700; }
 .admin-toggle-button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
 .admin-toggle-button:disabled { cursor: default; opacity: .65; }
+.admin-toggle-button[aria-busy="true"] { cursor: wait; }
 .admin-toggle-track { display: flex; align-items: center; width: 38px; height: 22px; padding: 3px; flex: none; border-radius: 100px; background: #586c78; }
 .admin-toggle-track::before { content: ''; width: 16px; height: 16px; border-radius: 50%; background: white; }
 .admin-toggle-button[aria-checked="true"] .admin-toggle-track { justify-content: flex-end; background: var(--teal); }
-.admin-toggle-note, .admin-toggle-feedback { color: var(--muted); font-size: .77rem; line-height: 1.4; }
-.admin-toggle-feedback:empty { position: absolute; }
+.admin-toggle-note { color: var(--muted); font-size: .77rem; line-height: 1.4; }
 .admin-status-section { display: grid; gap: 5px; margin-bottom: 18px; }
 .admin-status-section h2, .admin-status-section p { margin: 0; }
 .badge { display: inline-flex; align-items: center; min-height: 23px; padding: 3px 8px; border-radius: 999px; font-size: .72rem; font-weight: 700; }

@@ -43,7 +43,7 @@ class OrganizationsAndLocationsTest extends TestCase
             ->assertRedirect()->assertSessionHas('status');
         $this->assertDatabaseHas('admin_audit_events', ['action' => 'organization.updated', 'actor_id' => $admin->id]);
 
-        $location = Location::query()->create(['organization_id' => $organization->id, 'name' => 'Plantel Centro']);
+        $location = Location::factory()->for($organization)->create(['name' => 'Plantel Centro']);
         $this->get(route('admin.organizations.index'))->assertOk()
             ->assertSee('action="'.route('admin.organizations.status', $organization).'"', false)
             ->assertSee('Desactivar organización')
@@ -62,7 +62,7 @@ class OrganizationsAndLocationsTest extends TestCase
     public function test_location_crud_requires_active_organization_and_tracks_audits_and_filters(): void
     {
         $admin = $this->adminUser();
-        $organization = Organization::query()->create(['name' => 'Asociación Norte', 'slug' => 'asociacion-norte']);
+        $organization = Organization::factory()->create(['name' => 'Asociación Norte', 'slug' => 'asociacion-norte']);
         $this->actingAsAdmin($admin)->post(route('admin.locations.store'), [
             'organization_id' => $organization->id, 'name' => 'Sede Central', 'code' => 'CENTRAL', 'city' => 'Monterrey', 'country_code' => 'mx', 'latitude' => '25.6866',
         ])->assertRedirect();
@@ -104,7 +104,7 @@ class OrganizationsAndLocationsTest extends TestCase
     public function test_logo_is_private_optimized_and_documents_require_owner_policy(): void
     {
         $admin = $this->adminUser();
-        $organization = Organization::query()->create(['name' => 'Instituto Luz', 'slug' => 'instituto-luz']);
+        $organization = Organization::factory()->create(['name' => 'Instituto Luz', 'slug' => 'instituto-luz']);
         $this->actingAsAdmin($admin)->put(route('admin.organizations.update', $organization), [
             'name' => $organization->name, 'slug' => $organization->slug, 'logo' => UploadedFile::fake()->image('logo.png'),
         ])->assertRedirect();
@@ -139,8 +139,8 @@ class OrganizationsAndLocationsTest extends TestCase
     public function test_location_documents_are_scoped_through_the_registered_owner_policy(): void
     {
         $admin = $this->adminUser();
-        $organization = Organization::query()->create(['name' => 'Fundación Río', 'slug' => 'fundacion-rio']);
-        $location = Location::query()->create(['organization_id' => $organization->id, 'name' => 'Sede Río']);
+        $organization = Organization::factory()->create(['name' => 'Fundación Río', 'slug' => 'fundacion-rio']);
+        $location = Location::factory()->for($organization)->create(['name' => 'Sede Río']);
         $document = app(DocumentService::class)->upload(
             UploadedFile::fake()->createWithContent('manual.txt', 'Contenido de prueba'),
             $location,
@@ -158,10 +158,10 @@ class OrganizationsAndLocationsTest extends TestCase
     public function test_organization_and_location_lists_paginate(): void
     {
         $admin = $this->adminUser();
-        $organization = Organization::query()->create(['name' => 'Red de Escuelas', 'slug' => 'red-de-escuelas']);
+        $organization = Organization::factory()->create(['name' => 'Red de Escuelas', 'slug' => 'red-de-escuelas']);
         foreach (range(1, 16) as $number) {
-            Organization::query()->create(['name' => 'Organización '.$number, 'slug' => 'organizacion-'.$number]);
-            Location::query()->create(['organization_id' => $organization->id, 'name' => 'Sede '.$number]);
+            Organization::factory()->create(['name' => 'Organización '.$number, 'slug' => 'organizacion-'.$number]);
+            Location::factory()->for($organization)->create(['name' => 'Sede '.$number]);
         }
 
         $this->actingAsAdmin($admin)->get(route('admin.organizations.index'))->assertOk()->assertSee('page=2', false);
