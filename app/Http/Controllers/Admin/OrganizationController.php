@@ -22,7 +22,7 @@ class OrganizationController extends Controller
         $organizations = Organization::query()->withCount('locations')->with('logo')
             ->when($filters['q'] ?? null, fn ($query, string $q) => $query->where(fn ($sub) => $sub->where('name', 'like', "%{$q}%")->orWhere('legal_name', 'like', "%{$q}%")->orWhere('slug', 'like', "%{$q}%")))
             ->when(isset($filters['status']), fn ($query) => $query->where('is_active', $filters['status'] === 'active'))
-            ->orderBy('name')->paginate(15)->withQueryString();
+            ->orderBy('name')->adminPaginate();
 
         return view('admin.organizations.index', compact('organizations', 'filters'));
     }

@@ -16,10 +16,11 @@
     </section>
 
     <section class="panel">
-        <form method="GET" action="{{ route('admin.login-security.index') }}" class="filter-bar" aria-label="Filtrar intentos de acceso">
-            <label class="filter-search" for="search">Usuario o correo<input id="search" name="search" type="search" value="{{ $filters['search'] }}" maxlength="100"></label>
-            <label for="ip">IP<input id="ip" name="ip" type="search" value="{{ $filters['ip'] }}" maxlength="45"></label>
-            <label for="result">Resultado<select id="result" name="result">
+        <form method="GET" action="{{ route('admin.login-security.index') }}" class="admin-filter-bar" aria-label="Filtrar intentos de acceso">
+            <input type="hidden" name="per_page" value="{{ \App\Support\AdminPagination::perPage() }}">
+            <label class="admin-filter-field filter-search" for="search">Usuario o correo<input id="search" name="search" type="search" value="{{ $filters['search'] }}" maxlength="100"></label>
+            <label class="admin-filter-field" for="ip">IP<input id="ip" name="ip" type="search" value="{{ $filters['ip'] }}" maxlength="45"></label>
+            <label class="admin-filter-field" for="result">Resultado<select id="result" name="result">
                 <option value="">Todos</option>
                 @foreach(\App\Models\LoginAttempt::RESULTS as $value)
                     <option value="{{ $value }}" @selected($filters['result'] === $value)>
@@ -27,7 +28,7 @@
                     </option>
                 @endforeach
             </select></label>
-            <div class="filter-actions"><button class="button button-primary button-small" type="submit">Aplicar</button><a class="button button-secondary button-small" href="{{ route('admin.login-security.index') }}">Limpiar</a></div>
+            <div class="admin-filter-actions"><button class="button button-primary button-small" type="submit">Aplicar</button><a class="button button-tertiary button-small" href="{{ route('admin.login-security.index') }}">Limpiar</a></div>
         </form>
 
         @if($attempts->isEmpty())
@@ -52,7 +53,7 @@
                 @endforeach
                 </tbody>
             </table></div>
-            <div class="pagination-wrap">{{ $attempts->links() }}</div>
         @endif
+        <div class="pagination-wrap">{{ $attempts->links() }}</div>
     </section>
 @endsection

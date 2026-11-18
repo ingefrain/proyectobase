@@ -21,7 +21,7 @@ class LocationController extends Controller
             ->when($filters['q'] ?? null, fn ($query, string $q) => $query->where(fn ($sub) => $sub->where('locations.name', 'like', "%{$q}%")->orWhere('code', 'like', "%{$q}%")->orWhere('city', 'like', "%{$q}%")->orWhereHas('organization', fn ($org) => $org->where('name', 'like', "%{$q}%"))))
             ->when(isset($filters['status']), fn ($query) => $query->where('is_active', $filters['status'] === 'active'))
             ->when($filters['organization'] ?? null, fn ($query, string $uuid) => $query->whereHas('organization', fn ($org) => $org->where('uuid', $uuid)))
-            ->orderBy('name')->paginate(15)->withQueryString();
+            ->orderBy('name')->adminPaginate();
 
         return view('admin.locations.index', compact('locations', 'filters'));
     }

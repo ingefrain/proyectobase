@@ -85,7 +85,7 @@ class CatalogsTest extends TestCase
             CatalogItem::factory()->for($catalog)->create(['name' => 'Fila '.$i, 'slug' => 'fila-'.$i]);
         }
         $this->get(route('admin.catalogs.items.index', $catalog).'?q=Fila&status=active')->assertOk()->assertSee('Fila 15');
-        $this->get(route('admin.catalogs.items.index', $catalog).'?status=active')->assertOk()->assertSee('status=active&amp;page=2', false);
+        $this->get(route('admin.catalogs.items.index', $catalog).'?status=active&per_page=10')->assertOk()->assertSee('status=active&amp;per_page=10&amp;page=2', false);
 
         $this->put(route('admin.catalogs.items.update', [$catalog, $item]), ['name' => 'Clases actualizadas', 'is_active' => 0])->assertRedirect();
         $this->assertTrue($item->refresh()->is_active);

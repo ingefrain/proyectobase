@@ -30,7 +30,7 @@ final class CatalogItemController
             ->when(isset($filters['q']), fn ($query) => $query->where(fn ($search) => $search
                 ->whereLike('name', '%'.$filters['q'].'%')->orWhereLike('code', '%'.$filters['q'].'%')))
             ->when(isset($filters['status']), fn ($query) => $query->where('is_active', $filters['status'] === 'active'))
-            ->orderBy('sort_order')->orderBy('name')->orderBy('id')->paginate(15)->withQueryString();
+            ->orderBy('sort_order')->orderBy('name')->orderBy('id')->adminPaginate();
         $items->getCollection()->each(fn (CatalogItem $item) => $item->setRelation('catalog', $catalog));
 
         return view('admin.catalogs.items.index', compact('catalog', 'filters', 'items'));

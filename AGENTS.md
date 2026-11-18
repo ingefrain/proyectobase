@@ -20,6 +20,8 @@ Todos esos documentos están en ../xtras/docs. Las migraciones definen el esquem
 Revisa las vistas existentes. Usa superficie administrativa centrada o amplia y grid responsive. Cada campo agrupa label, control, ayuda y error. Evita tarjetas limitadas por max-width pegadas a la izquierda.
 Reutiliza Dropzone, Markdown, Toggle para estados reversibles, Notify para feedback temporal, Alert para información persistente y Modal/Confirm Dialog para confirmaciones. Evita window.alert() y window.confirm(). Revisa los componentes propios antes de introducir otra dependencia.
 
+Listas nuevas usan `adminPaginate()` y `links()` con la paginación propia; filtros usan `admin-filter-bar`, `admin-filter-field` y acciones agrupadas en `admin-filter-actions`. Respeta la jerarquía primary/secondary/tertiary/danger/confirmation. Usa tokens `--admin-*` en lugar de colores literales; marca y estados semánticos son independientes. Contrato en COMPONENTES_REUTILIZABLES.md.
+
 ## Datos y seguridad
 
 Seeders solo estructurales e idempotentes. Factories para tests y fixtures pequeñas por escenario. No crear precarga DEMO global ni depender de registros de desarrollo.

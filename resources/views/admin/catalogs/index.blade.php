@@ -44,8 +44,8 @@
                     </tbody>
                 </table>
             </div>
-            <div class="pagination-wrap">{{ $catalogs->links() }}</div>
         @endif
+        <div class="pagination-wrap">{{ $catalogs->links() }}</div>
     </section>
 </div>
 @endsection

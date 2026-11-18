@@ -32,7 +32,7 @@ final class ReportController
         $filters = $validator->fails() ? [] : $validator->validated();
         $filterErrors = $validator->errors();
         $results = $filterErrors->isEmpty()
-            ? $report->query($filters)->orderBy('id')->paginate(25)->appends($filters)
+            ? $report->query($filters)->orderBy('id')->adminPaginate()
             : null;
         $columns = $report->columns();
         $rows = $results?->getCollection()->map($report->row(...));

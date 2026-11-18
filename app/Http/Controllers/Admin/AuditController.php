@@ -19,7 +19,7 @@ class AuditController extends Controller
         $events = AdminAuditEvent::query()->with('actor')
             ->when($filters['action'] ?? null, fn ($query, string $action) => $query->where('action', $action))
             ->when($filters['entity'] ?? null, fn ($query, string $entity) => $query->where('entity_type', $entity))
-            ->latest('created_at')->paginate(20)->withQueryString();
+            ->latest('created_at')->adminPaginate();
 
         return view('admin.audit.index', compact('events', 'filters'));
     }

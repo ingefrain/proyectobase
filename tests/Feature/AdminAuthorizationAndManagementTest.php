@@ -37,7 +37,7 @@ class AdminAuthorizationAndManagementTest extends TestCase
         $this->actingAsAdmin($admin)->get(route('admin.users.index', ['q' => 'Lucía', 'role' => $operator->id]))
             ->assertOk()->assertSee('Lucía Operadora')->assertDontSee('Lucía Activa');
         $this->actingAsAdmin($admin)->get(route('admin.users.index'))
-            ->assertOk()->assertViewHas('users', fn ($users) => $users->perPage() === 15 && $users->total() >= 20);
+            ->assertOk()->assertViewHas('users', fn ($users) => $users->perPage() === 20 && $users->total() >= 20);
     }
 
     public function test_administrative_pages_render_with_generic_branding(): void

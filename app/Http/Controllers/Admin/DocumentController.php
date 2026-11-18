@@ -46,7 +46,7 @@ class DocumentController extends Controller
             };
         }
 
-        $documents = $query->latest('created_at')->paginate(20)->withQueryString();
+        $documents = $query->latest('created_at')->adminPaginate();
         $documents->getCollection()->each(function (Document $document): void {
             $document->setAttribute('entity_label', $this->entityLabel($document));
         });

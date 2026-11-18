@@ -21,13 +21,14 @@
     @endcan
 
     <section class="panel admin-content-wide">
-        <form method="GET" action="{{ route('admin.documents.index') }}" class="filter-bar" aria-label="Filtrar documentos">
-            <label class="filter-search" for="q">Buscar<input id="q" name="q" type="search" value="{{ $filters['q'] ?? '' }}" maxlength="180" placeholder="Nombre, título o categoría"></label>
-            <label for="category">Categoría<select id="category" name="category"><option value="">Todas</option>@foreach($categories as $category)<option value="{{ $category['key'] }}" @selected(($filters['category'] ?? '') === $category['key'])>{{ $category['label'] }}</option>@endforeach</select></label>
-            <label for="type">Tipo<select id="type" name="type"><option value="">Todos</option><option value="image" @selected(($filters['type'] ?? '') === 'image')>Imagen</option><option value="pdf" @selected(($filters['type'] ?? '') === 'pdf')>PDF</option><option value="text" @selected(($filters['type'] ?? '') === 'text')>Texto</option><option value="other" @selected(($filters['type'] ?? '') === 'other')>Otro</option></select></label>
-            <label for="date-from">Desde<input id="date-from" name="date_from" type="date" value="{{ $filters['date_from'] ?? '' }}"></label>
-            <label for="date-to">Hasta<input id="date-to" name="date_to" type="date" value="{{ $filters['date_to'] ?? '' }}"></label>
-            <div class="filter-actions"><button class="button button-primary button-small" type="submit">Aplicar</button><a class="button button-secondary button-small" href="{{ route('admin.documents.index') }}">Limpiar</a></div>
+        <form method="GET" action="{{ route('admin.documents.index') }}" class="admin-filter-bar" aria-label="Filtrar documentos">
+            <input type="hidden" name="per_page" value="{{ \App\Support\AdminPagination::perPage() }}">
+            <label class="admin-filter-field filter-search" for="q">Buscar<input id="q" name="q" type="search" value="{{ $filters['q'] ?? '' }}" maxlength="180" placeholder="Nombre, título o categoría"></label>
+            <label class="admin-filter-field" for="category">Categoría<select id="category" name="category"><option value="">Todas</option>@foreach($categories as $category)<option value="{{ $category['key'] }}" @selected(($filters['category'] ?? '') === $category['key'])>{{ $category['label'] }}</option>@endforeach</select></label>
+            <label class="admin-filter-field" for="type">Tipo<select id="type" name="type"><option value="">Todos</option><option value="image" @selected(($filters['type'] ?? '') === 'image')>Imagen</option><option value="pdf" @selected(($filters['type'] ?? '') === 'pdf')>PDF</option><option value="text" @selected(($filters['type'] ?? '') === 'text')>Texto</option><option value="other" @selected(($filters['type'] ?? '') === 'other')>Otro</option></select></label>
+            <label class="admin-filter-field" for="date-from">Desde<input id="date-from" name="date_from" type="date" value="{{ $filters['date_from'] ?? '' }}"></label>
+            <label class="admin-filter-field" for="date-to">Hasta<input id="date-to" name="date_to" type="date" value="{{ $filters['date_to'] ?? '' }}"></label>
+            <div class="admin-filter-actions"><button class="button button-primary button-small" type="submit">Aplicar</button><a class="button button-tertiary button-small" href="{{ route('admin.documents.index') }}">Limpiar</a></div>
         </form>
 
         @if($documents->isEmpty())
@@ -72,7 +73,7 @@
                 @endforeach
                 </tbody>
             </table></div>
-            <div class="pagination-wrap">{{ $documents->links() }}</div>
         @endif
+        <div class="pagination-wrap">{{ $documents->links() }}</div>
     </section>
 @endsection

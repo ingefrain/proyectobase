@@ -83,7 +83,7 @@ class ReportsTest extends TestCase
         User::factory()->count(28)->create(['name' => 'Paginación', 'is_active' => true]);
         DB::enableQueryLog();
         $this->get(route('admin.reports.users', ['q' => 'Paginación', 'status' => 'active']))
-            ->assertOk()->assertSee('28 resultados')->assertSee('status=active&amp;page=2', false);
+            ->assertOk()->assertSee('28 resultados')->assertSee('status=active&amp;per_page=20&amp;page=2', false);
         $queries = DB::getQueryLog();
         DB::disableQueryLog();
         $roleLoadQueries = array_filter($queries, fn (array $entry): bool => str_contains($entry['query'], '"role_user"."user_id" in ('));

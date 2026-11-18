@@ -51,8 +51,8 @@
                     </tbody>
                 </table>
             </div>
-            <div class="pagination-wrap">{{ $items->links() }}</div>
         @endif
+        <div class="pagination-wrap">{{ $items->links() }}</div>
     </section>
 </div>
 @endsection

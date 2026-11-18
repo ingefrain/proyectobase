@@ -31,7 +31,7 @@ class RoleController extends Controller
                 'is_active',
                 $filters['status'] === 'active'
             ))
-            ->orderBy('name')->paginate(15)->withQueryString();
+            ->orderBy('name')->adminPaginate();
 
         return view('admin.roles.index', compact('roles', 'filters'));
     }

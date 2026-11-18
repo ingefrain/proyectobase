@@ -1,4 +1,26 @@
 (() => {
+    window.AdminButton = {
+        setLoading(button, loading) {
+            if (!button?.matches('[data-admin-button]')) return;
+            if ((button.getAttribute('aria-busy') === 'true') === loading) return;
+            if (loading) button.dataset.restoreDisabled = String(button.disabled);
+            button.disabled = loading || button.dataset.restoreDisabled === 'true';
+            button.setAttribute('aria-busy', String(loading));
+            button.querySelector('.button-label').setAttribute('aria-hidden', String(loading));
+            button.querySelector('.button-loading').setAttribute('aria-hidden', String(!loading));
+        },
+    };
+    document.querySelectorAll('[data-button-loading-demo]').forEach(button => {
+        button.addEventListener('click', async () => {
+            window.AdminButton.setLoading(button, true);
+            await new Promise(resolve => setTimeout(resolve, 1200));
+            window.AdminButton.setLoading(button, false);
+            window.AdminNotify?.show({ type: 'success', message: 'Guardado simulado completado.' });
+        });
+    });
+})();
+
+(() => {
     document.querySelectorAll('[data-password-toggle]').forEach(button => {
         const input = document.getElementById(button.getAttribute('aria-controls'));
         const slash = button.querySelector('[data-eye-slash]');

@@ -13,14 +13,14 @@
         </div>
         <a href="{{ route('admin.imports.template', $type) }}">Descargar plantilla CSV</a>
     </div>
-    <form class="card admin-form-surface" method="post" enctype="multipart/form-data" action="{{ route('admin.imports.store', $type) }}">
+    <form class="panel admin-form-surface" method="post" enctype="multipart/form-data" action="{{ route('admin.imports.store', $type) }}">
         @csrf
         <x-admin.dropzone name="csv" label="Seleccionar CSV" instructions="Arrastra un archivo CSV aquí o haz clic para seleccionarlo." accept=".csv,text/csv" types-label="CSV" :max-size-kb="config('imports.max_size_kb')" required />
         @error('csv')<p class="field-error" id="csv-error">{{ $message }}</p>@enderror
         <p class="muted">Máximo {{ config('imports.max_rows') }} filas. La validación solo crea una corrida de importación.</p>
         <div class="form-actions">
             <a class="button button-secondary" href="{{ route('admin.imports.index') }}">Volver</a>
-            <button class="button" type="submit">Validar CSV</button>
+            <button class="button button-primary" type="submit">Validar CSV</button>
         </div>
     </form>
 @endsection

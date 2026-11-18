@@ -159,7 +159,7 @@ class OrganizationsAndLocationsTest extends TestCase
     {
         $admin = $this->adminUser();
         $organization = Organization::factory()->create(['name' => 'Red de Escuelas', 'slug' => 'red-de-escuelas']);
-        foreach (range(1, 16) as $number) {
+        foreach (range(1, 21) as $number) {
             Organization::factory()->create(['name' => 'Organización '.$number, 'slug' => 'organizacion-'.$number]);
             Location::factory()->for($organization)->create(['name' => 'Sede '.$number]);
         }

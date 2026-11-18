@@ -9,9 +9,10 @@
             <a class="button button-secondary" href="{{ route('admin.reports.index') }}">Volver a Reportes</a>
         </div>
         <section class="panel">
-            <form method="GET" action="{{ route($definition['route']) }}" class="filter-bar report-filters" aria-label="Filtrar reporte">
+            <form method="GET" action="{{ route($definition['route']) }}" class="admin-filter-bar" aria-label="Filtrar reporte">
+                <input type="hidden" name="per_page" value="{{ \App\Support\AdminPagination::perPage() }}">
                 @foreach($fields as $name => $field)
-                    <label for="report-{{ $name }}">{{ $field['label'] }}
+                    <label class="admin-filter-field {{ $name === 'q' ? 'filter-search' : '' }}" for="report-{{ $name }}">{{ $field['label'] }}
                         @if(isset($field['options']))
                             @php($options = is_callable($field['options']) ? $field['options']() : $field['options'])
                             <select id="report-{{ $name }}" name="{{ $name }}">
@@ -25,9 +26,9 @@
                         @endif
                     </label>
                 @endforeach
-                <div class="filter-actions">
+                <div class="admin-filter-actions">
                     <button class="button button-primary button-small" type="submit">Aplicar filtros</button>
-                    <a class="button button-secondary button-small" href="{{ route($definition['route']) }}">Limpiar</a>
+                    <a class="button button-tertiary button-small" href="{{ route($definition['route']) }}">Limpiar</a>
                 </div>
             </form>
 

@@ -49,8 +49,7 @@ class LoginSecurityController extends Controller
             ->when($ip !== '', fn ($query) => $query->where('ip_address', 'like', "%{$ip}%"))
             ->latest('created_at')
             ->latest('id')
-            ->paginate(25)
-            ->withQueryString();
+            ->adminPaginate();
 
         return view('admin.login-security.index', [
             'attempts' => $attempts,

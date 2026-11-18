@@ -21,7 +21,7 @@ final class ImportController extends Controller
         $types = array_filter(ImportDefinition::TYPES, fn ($definition) => $this->access->allows($user, $definition['permission']));
         $canCreate = $this->access->allows($user, 'imports.create');
         $runs = ImportRun::query()->where('created_by', $this->access->actor($user)->id)
-            ->where('effective_user_id', $user->id)->whereIn('type', array_keys($types))->with('creator')->latest('id')->paginate(15);
+            ->where('effective_user_id', $user->id)->whereIn('type', array_keys($types))->with('creator')->latest('id')->adminPaginate();
 
         return view('admin.imports.index', compact('runs', 'types', 'canCreate'));
     }
@@ -56,7 +56,7 @@ final class ImportController extends Controller
     {
         $definition = $this->authorizeRun($request, $run);
         $sample = $this->imports->preview($run);
-        $rowErrors = $run->errors()->orderBy('row_number')->orderBy('id')->paginate(25);
+        $rowErrors = $run->errors()->orderBy('row_number')->orderBy('id')->adminPaginate();
         $canApply = $run->status === 'ready' && $run->expires_at->isFuture()
             && $this->access->allows($request->user(), 'imports.apply');
         $canDelete = $run->canBeDeleted() && $this->access->allows($request->user(), 'imports.create');

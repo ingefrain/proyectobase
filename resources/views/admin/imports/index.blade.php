@@ -14,7 +14,7 @@
             @endforeach
         </section>
     @endif
-    <section class="card">
+    <section class="panel">
         <h2>Historial de importaciones</h2>
         <div class="table-wrap">
             <table>

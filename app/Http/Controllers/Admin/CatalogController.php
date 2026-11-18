@@ -28,7 +28,7 @@ final class CatalogController
             ->when(isset($filters['organization']), fn ($query) => $query->whereHas('organization', fn ($org) => $org->where('uuid', $filters['organization'])))
             ->when(isset($filters['q']), fn ($query) => $query->whereLike('name', '%'.$filters['q'].'%'))
             ->when(isset($filters['status']), fn ($query) => $query->where('is_active', $filters['status'] === 'active'))
-            ->orderBy('sort_order')->orderBy('name')->orderBy('id')->paginate(15)->withQueryString();
+            ->orderBy('sort_order')->orderBy('name')->orderBy('id')->adminPaginate();
 
         return view('admin.catalogs.index', compact('catalogs', 'organizations', 'filters'));
     }

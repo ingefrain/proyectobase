@@ -6,7 +6,7 @@
     <div class="page-intro">
         <a href="{{ route('admin.imports.index') }}">Volver a importaciones</a>
     </div>
-    <section class="card">
+    <section class="panel">
         <h2>{{ $definition['title'] }}</h2>
         <p>{{ $run->original_name }} · {{ $run->statusLabel() }}</p>
         <p class="muted">Cargada por {{ $run->creator->name }} el {{ $run->created_at->format('d/m/Y H:i') }}.
@@ -20,7 +20,7 @@
         @if($canApply)
             <form method="post" action="{{ route('admin.imports.apply', $run) }}" data-confirm-form>
                 @csrf
-                <button class="button" type="submit">Importar {{ $run->valid_rows }} registros</button>
+                <button class="button button-primary" type="submit">Importar {{ $run->valid_rows }} registros</button>
                 <x-admin.confirm-dialog title="Aplicar importación" variant="warning"
                     :message="'Se crearán '.$run->valid_rows.' registros después de volver a validar el CSV.'"
                     consequence="Si alguna fila falla, se cancela toda la corrida." confirm-label="Aplicar importación" />
@@ -31,7 +31,7 @@
         @endif
     </section>
     @if($sample)
-        <section class="card">
+        <section class="panel">
             <h2>Vista previa</h2>
             <p class="muted">Se muestran hasta 25 filas y se recortan los textos largos.</p>
             <div class="table-wrap">
@@ -47,7 +47,7 @@
         </section>
     @endif
     @if($rowErrors->total())
-        <section class="card">
+        <section class="panel">
             <h2>Errores de validación</h2>
             <div class="table-wrap">
                 <table>

@@ -5,10 +5,11 @@
 @section('content')
     <div class="page-intro"><p class="muted">Administra ubicaciones asociadas a una organización.</p><div class="page-actions">@can('organizations.view')<a class="button button-secondary" href="{{ route('admin.organizations.index') }}">Ver organizaciones</a>@endcan @can('locations.create')<a class="button button-primary" href="{{ route('admin.locations.create', ['organization' => $filters['organization'] ?? null]) }}">Crear sede</a>@endcan</div></div>
     <section class="panel admin-content-wide">
-        <form method="GET" action="{{ route('admin.locations.index') }}" class="filter-bar" aria-label="Filtrar sedes">
-            <label class="filter-search" for="q">Buscar<input id="q" name="q" type="search" value="{{ $filters['q'] ?? '' }}" maxlength="120" placeholder="Nombre, código, ciudad u organización"></label>
-            <label for="status">Estado propio<select id="status" name="status"><option value="">Todos</option><option value="active" @selected(($filters['status'] ?? '') === 'active')>Activas</option><option value="inactive" @selected(($filters['status'] ?? '') === 'inactive')>Inactivas</option></select></label>
-            <div class="filter-actions"><button class="button button-primary button-small" type="submit">Aplicar</button><a class="button button-secondary button-small" href="{{ route('admin.locations.index') }}">Limpiar</a></div>
+        <form method="GET" action="{{ route('admin.locations.index') }}" class="admin-filter-bar" aria-label="Filtrar sedes">
+            <input type="hidden" name="per_page" value="{{ \App\Support\AdminPagination::perPage() }}">
+            <label class="admin-filter-field filter-search" for="q">Buscar<input id="q" name="q" type="search" value="{{ $filters['q'] ?? '' }}" maxlength="120" placeholder="Nombre, código, ciudad u organización"></label>
+            <label class="admin-filter-field" for="status">Estado propio<select id="status" name="status"><option value="">Todos</option><option value="active" @selected(($filters['status'] ?? '') === 'active')>Activas</option><option value="inactive" @selected(($filters['status'] ?? '') === 'inactive')>Inactivas</option></select></label>
+            <div class="admin-filter-actions"><button class="button button-primary button-small" type="submit">Aplicar</button><a class="button button-tertiary button-small" href="{{ route('admin.locations.index') }}">Limpiar</a></div>
         </form>
         @if($locations->isEmpty())<x-admin.empty-state title="No hay sedes para mostrar" description="Registra una sede desde una organización activa." />@else
             <div class="table-wrap"><table><thead><tr><th>Sede</th><th>Organización</th><th>Ubicación</th><th>Estado operativo</th><th><span class="sr-only">Acciones</span></th></tr></thead><tbody>
@@ -21,7 +22,8 @@
                                     @endif
                                     <button class="button {{ $location->is_active ? 'button-danger' : 'button-secondary' }} button-small" type="submit">{{ $location->is_active ? 'Desactivar' : 'Activar' }}</button></form>@endcan</td></tr>
             @endforeach
-            </tbody></table></div><div class="pagination-wrap">{{ $locations->links() }}</div>
+            </tbody></table></div>
         @endif
+        <div class="pagination-wrap">{{ $locations->links() }}</div>
     </section>
 @endsection

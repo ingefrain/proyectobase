@@ -11,11 +11,12 @@
         </div>
     </div>
     <section class="panel users-panel">
-        <form method="GET" action="{{ route('admin.users.index') }}" class="filter-bar" aria-label="Filtrar usuarios">
-            <label class="filter-search" for="q">Buscar<input id="q" name="q" type="search" value="{{ $filters['q'] ?? '' }}" placeholder="Nombre o correo"></label>
-            <label for="status">Estado<select id="status" name="status"><option value="">Todos</option><option value="active" @selected(($filters['status'] ?? '') === 'active')>Activos</option><option value="inactive" @selected(($filters['status'] ?? '') === 'inactive')>Inactivos</option></select></label>
-            <label for="role">Rol<select id="role" name="role"><option value="">Todos</option>@foreach($roles as $role)<option value="{{ $role->id }}" @selected((string)($filters['role'] ?? '') === (string)$role->id)>{{ $role->name }}{{ $role->is_active ? '' : ' · inactivo' }}</option>@endforeach</select></label>
-            <div class="filter-actions"><button class="button button-primary button-small" type="submit">Aplicar</button><a class="button button-secondary button-small" href="{{ route('admin.users.index') }}">Limpiar</a></div>
+        <form method="GET" action="{{ route('admin.users.index') }}" class="admin-filter-bar" aria-label="Filtrar usuarios">
+            <input type="hidden" name="per_page" value="{{ \App\Support\AdminPagination::perPage() }}">
+            <label class="admin-filter-field filter-search" for="q">Buscar<input id="q" name="q" type="search" value="{{ $filters['q'] ?? '' }}" placeholder="Nombre o correo"></label>
+            <label class="admin-filter-field" for="status">Estado<select id="status" name="status"><option value="">Todos</option><option value="active" @selected(($filters['status'] ?? '') === 'active')>Activos</option><option value="inactive" @selected(($filters['status'] ?? '') === 'inactive')>Inactivos</option></select></label>
+            <label class="admin-filter-field" for="role">Rol<select id="role" name="role"><option value="">Todos</option>@foreach($roles as $role)<option value="{{ $role->id }}" @selected((string)($filters['role'] ?? '') === (string)$role->id)>{{ $role->name }}{{ $role->is_active ? '' : ' · inactivo' }}</option>@endforeach</select></label>
+            <div class="admin-filter-actions"><button class="button button-primary button-small" type="submit">Aplicar</button><a class="button button-tertiary button-small" href="{{ route('admin.users.index') }}">Limpiar</a></div>
         </form>
         @if($users->isEmpty())
             <x-admin.empty-state title="No hay usuarios para mostrar" description="Prueba otros filtros o crea una cuenta." />
@@ -74,7 +75,7 @@
                 @endforeach
                 </tbody>
             </table></div>
-            <div class="pagination-wrap">{{ $users->links() }}</div>
         @endif
+        <div class="pagination-wrap">{{ $users->links() }}</div>
     </section>
 @endsection
